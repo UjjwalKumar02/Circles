@@ -13,17 +13,22 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
       try {
         const res = await fetch("http://localhost:5000/users/me", {
           method: "GET",
-          credentials: "include", // important for cookies
+          credentials: "include",
         });
         setIsAuth(res.ok);
+        console.log("User is logged in");
       } catch (error) {
         setIsAuth(false);
       }
     };
+
     checkAuth();
   }, []);
 
-  if (isAuth === null) return <p>Loading...</p>; // show loading while checking
+  if (isAuth === null) {
+    return <p>Loading...</p>;
+  }
+
   return isAuth ? <>{children}</> : <Navigate to="/" replace />;
 };
 
