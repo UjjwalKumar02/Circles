@@ -207,19 +207,19 @@ const Profile = () => {
 
         {showConfirm && (
           <div className="fixed inset-0 bg-black/25 flex justify-center items-center">
-            <div className="bg-white py-10 px-12 rounded-2xl">
+            <div className="bg-white py-10 px-12 rounded-xl">
               <h1 className="text-lg font-medium">
                 Please confirm to delete your account!
               </h1>
               <div className="flex justify-between gap-5 mt-8">
                 <button
                   onClick={deleteUser}
-                  className="w-full bg-red-600 text-white rounded-lg py-1 cursor-pointer">
+                  className="w-full bg-red-600 text-white rounded-xl py-1 cursor-pointer">
                   {deleteLoading ? "Deleting..." : "Delete"}
                 </button>
                 <button
                   onClick={() => setShowConfirm(false)}
-                  className="w-full bg-black text-white rounded-lg py-1 cursor-pointer">
+                  className="w-full border border-gray-400 rounded-xl py-1 cursor-pointer">
                   Cancel
                 </button>
               </div>

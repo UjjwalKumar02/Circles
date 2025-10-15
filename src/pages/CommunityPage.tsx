@@ -19,7 +19,7 @@ interface Post {
   content: string;
   author: Author;
   anonymous: boolean;
-  isAnouncement: boolean;
+  isAnnouncement: boolean;
   createdAt: string;
   likes: Like[];
   likedByUser: boolean;
@@ -46,11 +46,11 @@ const CommunityPage = () => {
   const [creating, setCreating] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isAnouncement, setIsAnouncement] = useState(false);
+  const [isAnnouncement, setIsAnnouncement] = useState(false);
 
 
   const fetchCommunityDetails = async () => {
-    setLoading(true);
+    
     try {
       const res = await fetch(`http://localhost:5000/api/communities/${slug}`, {
         method: "GET",
@@ -84,10 +84,11 @@ const CommunityPage = () => {
 
   // always fetching the communities
   useEffect(() => {
+    setLoading(true);
     fetchCommunityDetails();
-  }, [slug]);   
+  }, [slug]);
 
-  
+
 
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,7 +104,7 @@ const CommunityPage = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ content, isAnonymous, isAnouncement }),
+      body: JSON.stringify({ content, isAnonymous, isAnnouncement }),
     });
 
     if (response.ok) {
@@ -114,7 +115,9 @@ const CommunityPage = () => {
     }
 
     setCreating(false);
-    setContent("")
+    setContent("");
+    setIsAnonymous(false);
+    setIsAnnouncement(false);
   }
 
 
@@ -164,27 +167,27 @@ const CommunityPage = () => {
       <div className="h-full w-full flex flex-col justify-start items-center pt-5 gap-5 text-sm pb-40">
 
         {community?.posts.map((p: Post) => (
-          <div 
-            key={p.id} 
-            className={`bg-white lg:w-[44%] w-full rounded-xl shadow px-6 py-4 space-y-3 border border-gray-100 ${p.isAnouncement ? "text-red-500 bg-pink-500 italic" : "text-gray-900"} `}>
+          <div
+            key={p.id}
+            className={`bg-white lg:w-[44%] w-full rounded-xl shadow px-6 py-4 space-y-3 border border-gray-100 ${p.isAnnouncement ? "text-red-500" : "text-gray-900"} `}>
 
             <div className="flex items-center gap-1.5">
-              {p.anonymous ? 
-              <p className="px-2.5 py-1 rounded-full bg-black text-white">?</p> : 
-              <img 
-                src={`http://localhost:5000/proxy-image?url=${encodeURIComponent(p.author.avatar)}`} 
-                alt="pic" 
-                className="mt- w-8 rounded-full " 
-              />}
-              <p className="font-medium">
+              {p.anonymous ?
+                <p className="px-2.5 py-1 rounded-full bg-black text-white">?</p> :
+                <img
+                  src={`http://localhost:5000/proxy-image?url=${encodeURIComponent(p.author.avatar)}`}
+                  alt="pic"
+                  className="mt- w-8 rounded-full "
+                />}
+              <p className="font-medium text-gray-800">
                 {p.anonymous ? "Anonymous" : p.author?.name}
               </p>
             </div>
 
-            <p className="mt-4 px-2.5">
+            <p className="px-1">
               {p.content}
             </p>
-            <div className="px-2.5">
+            <div className="px-1">
               <button
                 onClick={() => handleClickLike(p.id)}
                 className={`${p.likedByUser ? 'text-red-500 heart-pop' : 'text-gray-900'} flex items-center gap-1 cursor-pointer`}
@@ -200,34 +203,42 @@ const CommunityPage = () => {
         <div className="fixed bottom-4 bg-white lg:w-[44%] w-full border border-gray-300 rounded-2xl shadow-lg px-4 py-5 ">
           <div className="flex items-center gap-1">
             <button
-              onClick={() => setIsAnonymous(!isAnonymous)} 
+              onClick={() => setIsAnonymous(!isAnonymous)}
               className={`${isAnonymous ? "bg-blue-500 text-white" : ""} border border-gray-400 rounded-lg px-2 flex items-center gap-0.5 text-gray-800 mb-3 ml-2`}>
               {isAnonymous ? <RxCrossCircled size={16} /> : null}
               Anonymous
             </button>
-            <button
-              onClick={() => setIsAnouncement(!isAnouncement)} 
-              className={`${isAnouncement ? "bg-blue-500 text-white" : ""} border border-gray-400 rounded-lg px-2 flex items-center gap-0.5 text-gray-800 mb-3 ml-2`}>
-              {isAnouncement ? <RxCrossCircled size={16} /> : null}
-              Anouncement
-            </button>
+
+            {isAdmin && (
+              <button
+                onClick={() => setIsAnnouncement(!isAnnouncement)}
+                className={`${isAnnouncement ? "bg-blue-500 text-white" : ""} border border-gray-400 rounded-lg px-2 flex items-center gap-0.5 text-gray-800 mb-3 ml-2`}>
+                {isAnnouncement ? <RxCrossCircled size={16} /> : null}
+                Anouncement
+              </button>
+            )}
           </div>
-          <div className="flex items-center justify-center">
-            <input
-            type="text"
-            placeholder="write a post..."
-            value={content}
-            onChange={e => setContent(e.target.value)}
-            className="w-full border border-gray-300 rounded-l-full px-3 py-3"
-            required
-          />
-          <button
-            onClick={handleCreatePost}
-            className="bg-black text-white px-5 py-3 rounded-r-full font-medium text-md w-fit cursor-pointer border border-black flex items-center gap-1.5"
+
+          <form
+            onSubmit={handleCreatePost}
+            className="flex items-center justify-center"
           >
-            {creating ? 'Posting...' : 'Post'} <IoSendOutline color="white" />
-          </button>
-          </div>
+            <input
+              type="text"
+              placeholder="write a post..."
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="w-full border border-gray-300 rounded-l-full px-3 py-3"
+              required
+            />
+            <button
+              type="submit" // ✅ this is key!
+              className="bg-black text-white px-5 py-3 rounded-r-full font-medium text-md w-fit cursor-pointer border border-black flex items-center gap-1.5"
+            >
+              {creating ? 'Posting...' : 'Post'} <IoSendOutline color="white" />
+            </button>
+          </form>
+
         </div>
 
       </div>

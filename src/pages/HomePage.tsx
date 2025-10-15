@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Community from "../components/Community";
 import { IoMdAdd } from "react-icons/io";
-import { IoMdClose } from "react-icons/io";
+// import { IoMdClose } from "react-icons/io";
 import { Link } from "react-router-dom";
 
 
@@ -125,23 +125,24 @@ const Home = () => {
                 <IoMdAdd size={24} color="white"/>
               </button>
 
-              {showForm === "menu" && (
-              <div className="flex flex-col gap-0.5 justify-end w-80 animation transition-all duration-300">
+              
+            </div>
+            {showForm === "menu" && (
+              <div className="flex gap-2 justify-end animation transition-all duration-300">
                 <button
                   onClick={() => setShowForm("create")}
-                  className="px-3 py-1.5 bg-black text-white border border-gray-400 rounded-lg shadow-lg font-medium cursor-pointer"
+                  className="px-4 py-1.5 bg-black text-white border border-gray-400 rounded-lg shadow font-medium cursor-pointer"
                 >
                   Create a new community
                 </button>
                 <button
                   onClick={() => setShowForm("join")}
-                  className="px-3 py-1.5 bg-white text-gray-800 border border-gray-400 rounded-lg shadow-lg font-medium cursor-pointer"
+                  className="px-4 py-1.5 bg-white text-gray-800 border border-gray-400 rounded-lg shadow font-medium cursor-pointer"
                 >
-                  Join
+                  Join an existing community
                 </button>
               </div>
             )}
-            </div>
 
 
             <div>
@@ -155,6 +156,7 @@ const Home = () => {
                       name={community.name} 
                       description={community.desc} 
                       role={role}
+                      explore={false}
                     />
                   </Link>
                 </li>
