@@ -6,12 +6,14 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute = ({ children }: PrivateRouteProps) => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   const [isAuth, setIsAuth] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:5000/users/me", {
+        const res = await fetch(`${backendUrl}/users/me`, {
           method: "GET",
           credentials: "include",
         });

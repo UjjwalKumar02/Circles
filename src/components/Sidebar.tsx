@@ -6,11 +6,12 @@ import { FiX } from "react-icons/fi";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:5000/auth/logout", {
+      await fetch(`${backendUrl}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

@@ -4,21 +4,22 @@ import { FcGoogle } from "react-icons/fc";
 import { RiOpenSourceLine } from "react-icons/ri";
 import { FaRegCopyright } from "react-icons/fa6";
 import { PiLineVerticalLight } from "react-icons/pi";
-import img from "../../public/Screenshot 2025-09-24 122608.png"
 
 
 const LandingPage = () => {
   const navigate = useNavigate();
 
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/auth/google";
+    window.location.href = `${backendUrl}/auth/google`;
   };
 
 
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const res = await fetch("http://localhost:5000/users/me", {
+        const res = await fetch(`${backendUrl}/users/me`, {
           method: "GET",
           credentials: "include",
         });

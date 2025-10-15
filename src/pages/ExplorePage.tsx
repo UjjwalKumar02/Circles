@@ -4,10 +4,12 @@ import Community from "../components/Community";
 import { Link } from "react-router-dom";
 
 const Explore = () => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   const [exploreCommunities, setExploreCommunities] = useState([]);
 
   const fetchCommunities = async () => {
-    const res = await fetch("http://localhost:5000/api/communities/explore", {
+    const res = await fetch(`${backendUrl}/api/communities/explore`, {
       method: "GET",
       credentials: "include",
     });

@@ -38,6 +38,8 @@ interface Author {
 
 
 const CommunityPage = () => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   const { slug } = useParams();
   const [community, setCommunity] = useState<Community | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ const CommunityPage = () => {
   const fetchCommunityDetails = async () => {
     
     try {
-      const res = await fetch(`http://localhost:5000/api/communities/${slug}`, {
+      const res = await fetch(`${backendUrl}/api/communities/${slug}`, {
         method: "GET",
         credentials: "include",
       });
@@ -69,7 +71,7 @@ const CommunityPage = () => {
 
   const checkIsAdmin = async () => {
     try {
-      const response: any = await fetch(`http://localhost:5000/api/communities/${slug}/isadmin`, {
+      const response: any = await fetch(`${backendUrl}/api/communities/${slug}/isadmin`, {
         method: "GET",
         credentials: "include",
       });
@@ -98,7 +100,7 @@ const CommunityPage = () => {
     }
     setCreating(true);
 
-    const response = await fetch(`http://localhost:5000/api/communities/${slug}`, {
+    const response = await fetch(`${backendUrl}/api/communities/${slug}`, {
       method: 'POST',
       credentials: "include",
       headers: {
@@ -142,7 +144,7 @@ const CommunityPage = () => {
         })
       }
     });
-    await fetch(`http://localhost:5000/api/communities/posts/${postId}/like`, {
+    await fetch(`${backendUrl}/api/communities/posts/${postId}/like`, {
       method: 'POST',
       credentials: "include",
     });
@@ -175,7 +177,7 @@ const CommunityPage = () => {
               {p.anonymous ?
                 <p className="px-2.5 py-1 rounded-full bg-black text-white">?</p> :
                 <img
-                  src={`http://localhost:5000/proxy-image?url=${encodeURIComponent(p.author.avatar)}`}
+                  src={`${backendUrl}/proxy-image?url=${encodeURIComponent(p.author.avatar)}`}
                   alt="pic"
                   className="mt- w-8 rounded-full "
                 />}
@@ -232,7 +234,7 @@ const CommunityPage = () => {
               required
             />
             <button
-              type="submit" // ✅ this is key!
+              type="submit"
               className="bg-black text-white px-5 py-3 rounded-r-full font-medium text-md w-fit cursor-pointer border border-black flex items-center gap-1.5"
             >
               {creating ? 'Posting...' : 'Post'} <IoSendOutline color="white" />

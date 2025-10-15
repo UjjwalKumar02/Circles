@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Community from "../components/Community";
 import { IoMdAdd } from "react-icons/io";
-// import { IoMdClose } from "react-icons/io";
 import { Link } from "react-router-dom";
 
 
@@ -18,8 +17,10 @@ interface CommunityWithRole {
 
 
 const Home = () => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   const [myCommunities, setMyCommunities] = useState<CommunityWithRole[]>([]);
-  const [showForm, setShowForm] = useState<null | string>(null);
+  const [showForm, setShowForm] = useState<null | "create" | "join" | "menu">(null);
   const [circleName, setCircleName] = useState<string>("");
   const [circleDesc, setCircleDesc] = useState<string>("");
   const [createLoading, setCreateLoading] = useState(false);
@@ -28,7 +29,7 @@ const Home = () => {
 
 
   const fetchMyCommunities = async () => {
-    const res = await fetch("http://localhost:5000/api/communities/my", {
+    const res = await fetch(`${backendUrl}/api/communities/my`, {
       method: "GET",
       credentials: "include",
     });
@@ -44,7 +45,7 @@ const Home = () => {
 
   const handleCreate = async () => {
     setCreateLoading(true);
-    const res = await fetch("http://localhost:5000/api/communities", {
+    const res = await fetch(`${backendUrl}/api/communities`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -68,7 +69,7 @@ const Home = () => {
 
   const handleJoin = async (id: string) => {
     setJoinLoading(true);
-    const res = await fetch(`http://localhost:5000/api/communities/${id}/join`, {
+    const res = await fetch(`${backendUrl}/api/communities/${id}/join`, {
       method: "POST",
       credentials: "include",
     });

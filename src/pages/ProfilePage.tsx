@@ -16,6 +16,8 @@ interface UpdatedDetails {
 
 
 const Profile = () => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   const [profileDetails, setProfileDetails] = useState<UserDetails | null>(null);
 
   const [updatedDetails, setUpdatedDetails] = useState<UpdatedDetails>({
@@ -30,7 +32,7 @@ const Profile = () => {
 
 
   const fetchProfileDetails = async () => {
-    const res = await fetch("http://localhost:5000/users/details", {
+    const res = await fetch(`${backendUrl}/users/details`, {
       method: "GET",
       credentials: "include"
     });
@@ -58,7 +60,7 @@ const Profile = () => {
     setEditLoading(true);
     if (!updatedDetails) return;
 
-    const res = await fetch("http://localhost:5000/users/update", {
+    const res = await fetch(`${backendUrl}/users/update`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -79,12 +81,12 @@ const Profile = () => {
   const deleteUser = async () => {
     try {
       setDeleteLoading(true);
-      const res = await fetch("http://localhost:5000/users/delete", {
+      const res = await fetch(`${backendUrl}/users/delete`, {
         method: "DELETE",
         credentials: "include"
       });
 
-      await fetch("http://localhost:5000/auth/logout", {
+      await fetch(`${backendUrl}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -116,7 +118,7 @@ const Profile = () => {
           <div className="w-full flex lg:flex-row flex-col justify-center items-center lg:gap-26 gap-6 lg:px-2">
             {profileDetails && (
               <img
-                src={`http://localhost:5000/proxy-image?url=${encodeURIComponent(profileDetails.avatar)}`}
+                src={`${backendUrl}/proxy-image?url=${encodeURIComponent(profileDetails.avatar)}`}
                 alt="pic"
                 className="rounded-full h-40 w-40 border border-gray-400" />
             )}
