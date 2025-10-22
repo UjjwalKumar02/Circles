@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
+import { CiAt } from "react-icons/ci";
+import Navbar from "../components/Navbar";
 
 
 interface UserDetails {
+  username: string
   name: string
   email: string
   avatar: string
@@ -11,6 +14,7 @@ interface UserDetails {
 
 interface UpdatedDetails {
   username: string
+  name: string
   description: string
 }
 
@@ -21,17 +25,19 @@ const Profile = () => {
   const [profileDetails, setProfileDetails] = useState<UserDetails | null>(null);
 
   const [updatedDetails, setUpdatedDetails] = useState<UpdatedDetails>({
-    username: profileDetails?.name || "",
+    username: profileDetails?.username || "",
+    name: profileDetails?.name || "",
     description: profileDetails?.description || ""
   });
 
   const [showEdit, setShowEdit] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const [loading, setLoading] = useState(false);
 
 
   const fetchProfileDetails = async () => {
+    setLoading(true);
     const res = await fetch(`${backendUrl}/users/details`, {
       method: "GET",
       credentials: "include"
@@ -39,6 +45,7 @@ const Profile = () => {
     const data = await res.json();
     setProfileDetails(data);
     console.log("Fetching profile details", data);
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -49,7 +56,8 @@ const Profile = () => {
   useEffect(() => {
     if (profileDetails) {
       setUpdatedDetails({
-        username: profileDetails.name,
+        username: profileDetails.username,
+        name: profileDetails.name,
         description: profileDetails.description
       });
     }
@@ -57,8 +65,11 @@ const Profile = () => {
 
 
   const handleUpdate = async () => {
-    setEditLoading(true);
-    if (!updatedDetails) return;
+    setLoading(true);
+    if (!updatedDetails) {
+      alert("All field are required!");
+      return;
+    }
 
     const res = await fetch(`${backendUrl}/users/update`, {
       method: "PUT",
@@ -74,13 +85,13 @@ const Profile = () => {
     } else {
       console.log("Update failed")
     }
-    setEditLoading(false);
+    setLoading(false);
   };
 
 
   const deleteUser = async () => {
     try {
-      setDeleteLoading(true);
+      setLoading(true);
       const res = await fetch(`${backendUrl}/users/delete`, {
         method: "DELETE",
         credentials: "include"
@@ -102,135 +113,180 @@ const Profile = () => {
       console.error(error);
       alert("Something went wrong while deleting your account.");
     } finally {
-      setDeleteLoading(false);
+      setLoading(false);
     }
   };
 
 
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
-      <div className="lg:w-[42%] flex flex-col mx-auto mt-30 gap-6">
+    <div className="flex flex-col min-h-screen bg--100">
+      <Navbar loading={loading} />
 
-        <div className="flex flex-col justify-center items-center border border-gray-100 lg:py-6 py-6 lg:px-10 px-10 rounded-lg shadow gap-6 bg-white">
+      <div className="flex justify-center gap-6">
+        <Sidebar />
+        <div className="lg:w-[42%] w-full flex flex-col lg:mt-5 mt-0 gap-6">
 
-          <div className="w-full flex lg:flex-row flex-col justify-center items-center lg:gap-26 gap-6 lg:px-2">
-            {profileDetails && (
-              <img
-                src={`${backendUrl}/proxy-image?url=${encodeURIComponent(profileDetails.avatar)}`}
-                alt="pic"
-                className="rounded-full h-40 w-40 border border-gray-400" />
-            )}
+          <div className="flex flex-col justify-center items-center border-[1.5px] border-gray-300 lg:py-7 py-6 lg:px-10 px-10 lg:rounded-2xl gap-6 bg-white shadow-xs">
 
-            <div className="flex flex-col gap-4 lg:items-start items-center">
-              <h1 className="text-2xl font-medium">
-                {profileDetails?.name}
-              </h1>
-              <p>
-                {profileDetails?.email}
-              </p>
-              <p className="text-blue-600">
-                {profileDetails?.description}
-              </p>
+            <div className="w-full flex lg:flex-row flex-col justify-center items-center lg:gap-10 gap-6 lg:px-2">
+              {profileDetails && (
+                <img
+                  src={`${backendUrl}/proxy-image?url=${encodeURIComponent(profileDetails.avatar)}`}
+                  alt="pic"
+                  className="rounded-full h-40 w-40 border border-gray-400" />
+              )}
+
+              <div className="flex flex-col gap-2.5 lg:items-start items-center">
+
+                <div className="flex items-center gap-2.5">
+                  <h1 className="text-2xl font-medium">
+                    {profileDetails?.name}
+                  </h1>
+                  <p className="flex items-center text-xs text-[#0969da] border-[1.5px] rounded-full px-1.5 py-0.5 font-medium">
+                    <CiAt size={18} /> {profileDetails?.username}
+                  </p>
+                </div>
+                <p className="mt-2">
+                  {profileDetails?.email}
+                </p>
+                <p className="text-blue-600">
+                  {profileDetails?.description}
+                </p>
+              </div>
             </div>
+
           </div>
+
+          <div className="flex flex-col justify-center items-center gap-5 ">
+            <button
+              onClick={() => setShowEdit(true)}
+              className="lg:hidden block bg-[#f6f8fa] text-[#1f2328] text-sm px-9 py-1 rounded-xl font-medium cursor-pointer border-[1.5px] border-gray-300 shadow-xs"
+            >
+              Edit you profile
+            </button>
+            <button
+              onClick={() => { setShowConfirm(true); console.log(showConfirm) }}
+              className="text-red-600 cursor-pointer font-medium"
+            >
+              Delete your account
+            </button>
+          </div>
+
+
+
+
 
         </div>
 
-        <div className="flex flex-col justify-center items-center gap-5 mt-2">
+        <div className="hidden sticky top-19 mt-5 text-[#1f2328] py-10 px-9 border-[1.5px] border-gray-300 rounded-2xl shadow-xs lg:flex flex-col items-center gap-4 h-fit text-center">
+          <p>
+            Edit
+            your
+            <br />
+            profile
+          </p>
+
           <button
             onClick={() => setShowEdit(true)}
-            className="w-fit border border-gray-300 rounded-lg py-1 px-12 shadow cursor-pointer bg-black text-white font-medium"
+            className="bg-[#f6f8fa] text-[#1f2328] text-sm px-7 py-1 rounded-full font-medium cursor-pointer border-[1.5px] border-gray-300 shadow-xs"
           >
-            Edit profile
-          </button>
-          <button
-            onClick={() => { setShowConfirm(true); console.log(showConfirm) }}
-            className="text-red-600 cursor-pointer font-medium"
-          >
-            Delete your account
+            Edit
           </button>
         </div>
-
-        {showEdit && (
-          <div className="fixed inset-0 bg-black/15 flex justify-center items-center">
-            <div className="bg-white flex flex-col items-center gap-4 border border-gray-300 py-7 px-13 rounded-2xl shadow-lg">
-              <h1 className="text-2xl mb-4 font-medium">
-                Edit your profile
-              </h1>
-              <div className="w-full flex justify-between items-center">
-                <label htmlFor="username">Username</label>
-                <input
-                  type="text"
-                  id="username"
-                  value={updatedDetails?.username || ""}
-                  onChange={(e) =>
-                    setUpdatedDetails((prev) => ({
-                      ...prev!,
-                      username: e.target.value
-                    }))
-                  }
-                  className="bg-gray-50 border border-gray-300 py-0.5 px-2 rounded" />
-              </div>
-              <div className="w-full flex justify-between items-center">
-                <label htmlFor="description">Description</label>
-                <input
-                  type="text"
-                  id="description"
-                  value={updatedDetails?.description || ""}
-                  onChange={(e) =>
-                    setUpdatedDetails((prev) => ({
-                      ...prev!,
-                      description: e.target.value
-                    }))
-                  }
-                  className="bg-gray-50 border border-gray-300 py-0.5 px-2 rounded" />
-              </div>
-
-              <div className="w-full flex gap-4 justify-between mt-4">
-                <button
-                  onClick={handleUpdate}
-                  className="w-full border border-gray-200 rounded-xl px-12 py-0.5 cursor-pointer bg-blue-600 text-white">
-                  {editLoading ? "Saving..." : "Save"}
-                </button>
-                <button
-                  onClick={() => setShowEdit(false)}
-                  className="w-full border border-gray-300 rounded-xl px-12 py-0.5 cursor-pointer">
-                  Cancel
-                </button>
-              </div>
-              <p className="text-sm text-gray-800 mt-1">
-                Email and avatar updation will be available soon.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {showConfirm && (
-          <div className="fixed inset-0 bg-black/25 flex justify-center items-center">
-            <div className="bg-white py-10 px-12 rounded-xl">
-              <h1 className="text-lg font-medium">
-                Please confirm to delete your account!
-              </h1>
-              <div className="flex justify-between gap-5 mt-8">
-                <button
-                  onClick={deleteUser}
-                  className="w-full bg-red-600 text-white rounded-xl py-1 cursor-pointer">
-                  {deleteLoading ? "Deleting..." : "Delete"}
-                </button>
-                <button
-                  onClick={() => setShowConfirm(false)}
-                  className="w-full border border-gray-400 rounded-xl py-1 cursor-pointer">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
       </div>
 
+
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/10 flex items-center justify-center text-[#1f2328]">
+          <div className="bg-white px-10 py-9 rounded-2xl shadow flex flex-col gap-4 justify-center">
+            <h1 className="text- text-center font-medium md:mb-4 mb-1">
+              Please confirm to delete your account!
+            </h1>
+            <div className="w-full flex items-center md:justify-between justify-between gap-2.5 mt-2 text-[#1f2328]">
+              <button
+                onClick={deleteUser}
+                className="md:w-fit px-9 py-1 bg-[#f6f8fa]  rounded-lg font-medium border-[1.5px] border-gray-300 cursor-pointer text-sm shadow-xs w-full">
+                Delete
+              </button>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="w-full md:w-fit py-1 px-9 border border-gray-300 rounded-lg font-medium cursor-pointer text-sm">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {showEdit && (
+        <div className="fixed inset-0 bg-black/10 flex items-center justify-center text-[#1f2328]">
+          <div className="bg-white px-12 py-9 rounded-2xl shadow flex flex-col gap-4 justify-center">
+            <h1 className="text-xl text-center font-medium md:mb-4 mb-1">
+              Edit your profile
+            </h1>
+            <div className="flex md:flex-row flex-col justify-between md:gap-2 md:items-center">
+              <label htmlFor="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                value={updatedDetails?.username || ""}
+                onChange={(e) =>
+                  setUpdatedDetails((prev) => ({
+                    ...prev!,
+                    username: e.target.value
+                  }))
+                }
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-blue-50 " />
+            </div>
+            <div className="flex md:flex-row flex-col justify-between md:gap-2 md:items-center">
+              <label htmlFor="name">Name</label>
+              <input
+                type="text"
+                id="name"
+                value={updatedDetails?.name || ""}
+                onChange={(e) =>
+                  setUpdatedDetails((prev) => ({
+                    ...prev!,
+                    username: e.target.value
+                  }))
+                }
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-blue-50 " />
+            </div>
+            <div className="flex md:flex-row flex-col justify-between md:items-center md:gap-8">
+              <label htmlFor="description">Description</label>
+              <input
+                type="text"
+                id="description"
+                value={updatedDetails?.description || ""}
+                onChange={(e) =>
+                  setUpdatedDetails((prev) => ({
+                    ...prev!,
+                    description: e.target.value
+                  }))
+                }
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-blue-50 " />
+            </div>
+
+            <div className="w-full flex items-center md:justify-between justify-center gap-2.5 mt-2 text-[#1f2328]">
+              <button
+                onClick={handleUpdate}
+                className="md:w-fit px-9 py-1 bg-[#f6f8fa]  rounded-lg font-medium border-[1.5px] border-gray-300 cursor-pointer text-sm shadow-xs w-full">
+                Save
+              </button>
+              <button
+                onClick={() => setShowEdit(false)}
+                className="py-1 px-3 border border-gray-300 rounded-lg font-medium cursor-pointer text-sm">
+                Cancel
+              </button>
+            </div>
+            {/* <p className="text-sm text-gray-800 mt-1">
+                  Email and avatar updation will be available soon.
+                </p> */}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

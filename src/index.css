@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+@keyframes loading-bar {
+  0% {
+    left: -40%;
+  }
+  100% {
+    left: 100%;
+  }
+}

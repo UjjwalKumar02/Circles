@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
+import Navbar from "./Navbar";
 
 interface PrivateRouteProps {
   children: ReactNode;
@@ -28,7 +29,7 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
   }, []);
 
   if (isAuth === null) {
-    return <p>Loading...</p>;
+    return <Navbar loading={true} />;
   }
 
   return isAuth ? <>{children}</> : <Navigate to="/" replace />;

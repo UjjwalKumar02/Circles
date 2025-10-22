@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 import Community from "../components/Community";
 import { IoMdAdd } from "react-icons/io";
 import { Link } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 
 
 interface CommunityWithRole {
@@ -20,22 +21,35 @@ const Home = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const [myCommunities, setMyCommunities] = useState<CommunityWithRole[]>([]);
-  const [showForm, setShowForm] = useState<null | "create" | "join" | "menu">(null);
+  const [showForm, setShowForm] = useState<null | "create" | "join" | "menu" | "register">(null);
+
   const [circleName, setCircleName] = useState<string>("");
   const [circleDesc, setCircleDesc] = useState<string>("");
-  const [createLoading, setCreateLoading] = useState(false);
-  const [joinLoading, setJoinLoading] = useState(false);
+
   const [id, setId] = useState("");
+
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+
+  const [loading, setLoading] = useState(false);
 
 
   const fetchMyCommunities = async () => {
+    setLoading(true);
     const res = await fetch(`${backendUrl}/api/communities/my`, {
       method: "GET",
       credentials: "include",
     });
     const data = await res.json();
-    setMyCommunities(data);
+    setMyCommunities(data.communities);
+
+    if (!data.hasUsername) {
+      setShowForm("register");
+    }
+
     console.log("fetching communities", data)
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -44,7 +58,12 @@ const Home = () => {
 
 
   const handleCreate = async () => {
-    setCreateLoading(true);
+    if (!circleName) {
+      alert("Name cant be empty!");
+      return;
+    }
+
+    setLoading(true);
     const res = await fetch(`${backendUrl}/api/communities`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -59,194 +78,307 @@ const Home = () => {
       const err: any = res.json();
       alert("Failed to create circle: " + (err.error || "Unknown error"))
     }
+
     await fetchMyCommunities();
     setShowForm(null);
-    setCreateLoading(false);
+    setLoading(false);
     setCircleName("")
     setCircleDesc("")
   };
 
 
   const handleJoin = async (id: string) => {
-    setJoinLoading(true);
+    if (!id) {
+      alert("ID cant be empty!");
+      return;
+    }
+
+    setLoading(true);
     const res = await fetch(`${backendUrl}/api/communities/${id}/join`, {
       method: "POST",
       credentials: "include",
     });
 
     if (!res.ok) {
-    const err = await res.json();
-    alert("Failed to join: " + (err.error || "Unknown error"));
-    return;
-  }
+      const err = await res.json();
+      alert("Failed to join: " + (err.error || "Unknown error"));
+      setLoading(false);
+      return;
+    }
 
     await fetchMyCommunities();
     setShowForm(null);
-    setJoinLoading(false);
+    setLoading(false);
+    setId("");
   };
 
 
+  const handleRegister = async () => {
+    if (!username && !name) {
+      alert("Fill the details...");
+      return;
+    }
+
+    setLoading(true);
+    const response = await fetch(`${backendUrl}/users/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        username,
+        name,
+        description
+      })
+    });
+
+    if (!response.ok) {
+      const error: any = response.json();
+      alert("Error in registering user: " + (error.error || "Unknown error"));
+
+    }
+    console.log(response.json());
+
+    setLoading(false);
+    setShowForm(null);
+  }
+
+
+
+
   return (
-    <div className="min-h-screen flex mx-auto bg-gray-100">
-      <Sidebar />
+    <div className="min-h-screen w-full flex flex-col bg-[#fff]">
+      <Navbar loading={loading} />
 
-      <div className="flex-1 p-6 pt-26 lg:max-w-[44%] mx-auto">
+      <div className="flex justify-center lg:gap-6">
+        <Sidebar />
 
-        {/* <Community /> */}
-        {myCommunities.length === 0 ? (
-          <div className="mt-10">
-            <p className="text-center text-xl font-medium">
-              You don't have any communities yet.
-            </p>
-            <div className="w-fit flex flex-col gap-4 mt-10 mx-auto">
-              <button
-                onClick={() => setShowForm("create")}
-                className="px-12 py-1.5 bg-gray-800 text-white rounded-lg hover:bg-gray-700 cursor-pointer shadow"
-              >
-                Create a new Circle
-              </button>
-              <button
-                onClick={() => setShowForm("join")}
-                className="px-12 py-1.5 bg-white hover:bg-gray-100 cursor-pointer shadow border border-gray-300 rounded-lg"
-              >
-                Join an existing Circle
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-8">
-            <div className="flex justify-between mb-6 ">
-              <h2 className="text-xl font-medium">
-                Your communities
+        <div className="w-full flex-col lg:mt-5 mt-0 lg:w-[42%]">
+
+          <div className="">
+            <div className="flex justify-between items-center bg-[#f6f8fa] text-[#1f2328] px-5.5 py-3.5 border-x-[1.5px] border-y-[1.5px] border-x-gray-300 border-t-gray-300 border-b-gray-200 lg:rounded-t-2xl shadow-xs">
+              <h2 className="font-medium text-lg w-full py-0.5">
+                Communities
               </h2>
               <button
                 onClick={() => setShowForm(showForm ? null : "menu")}
-                className="px-1 py-1 rounded-full bg-gray-800 cursor-pointer"
+                className="lg:hidden block px-1 py-1 rounded-full  cursor-pointer"
               >
-                <IoMdAdd size={24} color="white"/>
+                <IoMdAdd size={24} color="black" />
               </button>
 
-              
+
             </div>
             {showForm === "menu" && (
-              <div className="flex gap-2 justify-end animation transition-all duration-300">
+              <div className=" justify-end animation transition-all duration-300">
                 <button
                   onClick={() => setShowForm("create")}
-                  className="px-4 py-1.5 bg-black text-white border border-gray-400 rounded-lg shadow font-medium cursor-pointer"
+                  className="w-full text-[#0969da] px-5.5 py-3.5 border-x-[1.5px] border-t-[1.5px] border-gray-300 shadow-xs font-medium cursor-pointer text-right text-sm"
                 >
                   Create a new community
                 </button>
                 <button
                   onClick={() => setShowForm("join")}
-                  className="px-4 py-1.5 bg-white text-gray-800 border border-gray-400 rounded-lg shadow font-medium cursor-pointer"
+                  className="w-full text-[#0969da] px-5.5 py-3.5 border-x-[1.5px] border-t-[1.5px] border-gray-300 shadow-xs font-medium cursor-pointer text-right text-sm"
                 >
-                  Join an existing community
+                  Join a community
                 </button>
               </div>
             )}
 
 
-            <div>
-              {myCommunities.map(({ community, role }) => (
-                <li 
-                  key={community.id} 
-                  className="list-none"
-                >
+            {myCommunities.length !== 0 && (
+              <div className="w-full shadow-xs border-b-[1.5px] border-gray-300">
+                {myCommunities.map(({ community, role }) => (
                   <Link to={`/community/${community.slug}`}>
-                    <Community 
-                      name={community.name} 
-                      description={community.desc} 
+                    <Community
+                      name={community.name}
+                      description={community.desc}
                       role={role}
-                      explore={false}
                     />
                   </Link>
-                </li>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
           </div>
-        )}
+        </div>
 
+        <div>
+          <div className="sticky top-19 hidden lg:flex h-fit mt-5 bg- text-[#1f2328] border-[1.5px] border-gray-300 px-9 flex-col items-center py-10 gap-4 rounded-2xl shadow-xs">
+            <p>
+              Create new
+              <br />
+              community
+            </p>
+            <button
+              onClick={() => setShowForm("create")}
+              className="w-full bg-[#f6f8fa] text-[#1f2328] text-sm px-7 py-1 rounded-full font-medium cursor-pointer border-[1.5px] border-gray-300"
+            >
+              Create
+            </button>
+          </div>
+          <div className="sticky top-68 hidden lg:flex h-fit mt-5 bg- text-[#1f2328] -xl border-[1.5px] border-gray-300 px-9 flex-col items-center py-10 gap-4 rounded-2xl shadow-xs">
+            <p>
+              Join any
+              <br />
+              community
+            </p>
+            <button
+              onClick={() => setShowForm("join")}
+              className="w-full bg-[#f6f8fa] text-[#1f2328] text-sm px-7 py-1 rounded-full font-medium cursor-pointer border-[1.5px] border-gray-300"
+            >
+              Join
+            </button>
+          </div>
+        </div>
+      </div>
 
+      {showForm === "create" && (
+        <div
+          className="fixed inset-0 bg-black/10 flex items-center justify-center text-[#1f2328]"
+        >
+          <div className="bg-white px-12 py-9 rounded-2xl shadow flex flex-col gap-4 justify-center">
+            <h1 className="text-xl text-center font-medium md:mb-4 mb-1">
+              Create a community
+            </h1>
 
-        {/* Conditional forms */}
-        {showForm === "create" && (
-          <div
-            className="fixed inset-0 bg-black/30 flex items-center justify-center"
-          >
-            <div className="bg-white px-12 py-9 rounded-xl shadow flex flex-col gap-4 justify-center">
-              <h1 className="text-2xl text-center font-medium mb-4">
-                Create a new Community
-              </h1>
-
-              <div className="flex justify-between">
-                <label htmlFor="name">Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  value={circleName}
-                  onChange={(e) => setCircleName(e.target.value)}
-                  required
-                  className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-blue-50"
-                />
-              </div>
-              <div className="flex justify-between">
-                <label htmlFor="desc">Description</label>
-                <input
-                  type="text"
-                  value={circleDesc}
-                  onChange={(e) => setCircleDesc(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-blue-50"
-                />
-              </div>
-              <div className="w-full flex items-center justify-between gap-2.5 mt-2">
-                <button
-                  onClick={handleCreate}
-                  className="w-fit px-9 py-1 bg-blue-600 text-white rounded-lg font-medium cursor-pointer text-sm"
-                >
-                  {createLoading ? "Loading..." : "Create"}
-                </button>
-                <button
-                  onClick={() => setShowForm(null)}
-                  className="py-1 px-3 border border-gray-300 rounded-full font-medium cursor-pointer text-sm">
-                  Close
-                </button>
-              </div>
+            <div className="flex md:flex-row flex-col justify-between md:gap-2 md:items-center">
+              <label htmlFor="name">Name</label>
+              <input
+                type="text"
+                id="name"
+                value={circleName}
+                onChange={(e) => setCircleName(e.target.value)}
+                required
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-blue-50"
+              />
+            </div>
+            <div className="flex md:flex-row flex-col justify-between md:items-center md:gap-8">
+              <label htmlFor="desc">Description</label>
+              <input
+                type="text"
+                value={circleDesc}
+                onChange={(e) => setCircleDesc(e.target.value)}
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-blue-50 "
+              />
+            </div>
+            <div className="w-full flex items-center md:justify-between justify-center gap-2.5 mt-2 text-[#1f2328]">
+              <button
+                onClick={handleCreate}
+                className="md:w-fit px-9 py-1 bg-[#f6f8fa]  rounded-lg font-medium border-[1.5px] border-gray-300 cursor-pointer text-sm shadow-xs w-full"
+              >
+                Create
+              </button>
+              <button
+                onClick={() => setShowForm(null)}
+                className="py-1 px-3 border border-gray-300 rounded-lg font-medium cursor-pointer text-sm"
+              >
+                Close
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {showForm === "join" && (
-          <div
-            className="fixed inset-0 bg-black/10 flex justify-center items-center"
-          >
-            <div className="bg-white p-6 rounded-xl shadow flex flex-col gap-4 justify-center lg:w-96 ">
-              <div className="flex justify-between items-center mb-2 gap-4">
-                <h1 className="lg:text-lg font-medium">
-                  Join a Community
-                </h1>
-                <button onClick={() => setShowForm(null)} className="cursor-pointer border border-gray-300 py-1 px-3 rounded-full text-sm font-medium">
-                  Close
-                </button>
-              </div>
+      {showForm === "join" && (
+        <div
+          className="fixed inset-0 bg-black/10 flex items-center justify-center text-[#1f2328]"
+        >
+          <div className="bg-white px-12 py-9 rounded-2xl shadow flex flex-col gap-4 justify-center">
+
+            <h1 className="text-xl text-center font-medium md:mb-4 mb-1">
+              Join a Community
+            </h1>
+
+
+            <div className="flex md:flex-row flex-col justify-between md:gap-8 md:items-center">
+              <label htmlFor="id">
+                Community ID
+              </label>
               <input
                 name="id"
                 value={id}
                 onChange={(e) => setId(e.target.value)}
-                placeholder="Community ID"
-                className="border border-gray-400 px-2 py-1 rounded-lg"
+                placeholder=""
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-blue-50"
               />
+            </div>
+            <div className="w-full flex items-center md:justify-between justify-center gap-2.5 mt-2 text-[#1f2328]">
               <button
-                onClick={(e) => {e.preventDefault(); handleJoin(id);}}
-                className="w-fit mt-1 px-9 py-1 bg-green-600 text-white rounded-lg text-sm font-medium cursor-pointer"
+                onClick={(e) => { e.preventDefault(); handleJoin(id); }}
+                className="md:w-fit px-11 py-1 bg-[#f6f8fa]  rounded-lg font-medium border-[1.5px] border-gray-300 cursor-pointer text-sm shadow-xs w-full"
               >
-                {joinLoading ? "Joining..." : "Join"}
+                Join
+              </button>
+              <button
+                onClick={() => setShowForm(null)}
+                className="py-1 px-3 border border-gray-300 rounded-lg font-medium cursor-pointer text-sm"
+              >
+                Close
               </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-      </div>
+
+      {showForm === "register" && (
+        <div
+          className="fixed inset-0 bg-black/10 flex items-center justify-center text-[#1f2328]"
+        >
+          <div className=" bg-white px-12 py-9 rounded-2xl shadow flex flex-col gap-4 justify-center">
+            <h1 className="text-xl text-center font-medium md:mb-4 mb-1">
+              Complete your profile
+            </h1>
+
+            <div className="flex md:flex-row flex-col justify-between md:gap-8 md:items-center">
+              <label htmlFor="name">Username</label>
+              <input
+                type="text"
+                id="name"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-blue-50"
+              />
+            </div>
+            <div className="flex md:flex-row flex-col justify-between md:gap-8 md:items-center">
+              <label htmlFor="desc">Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-blue-50"
+              />
+            </div>
+            <div className="flex md:flex-row flex-col justify-between md:gap-8 md:items-center">
+              <label htmlFor="desc">Description</label>
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-blue-50"
+              />
+            </div>
+            <div className="w-full flex items-center md:justify-between justify-center gap-2.5 mt-2 text-[#1f2328]">
+              <button
+                onClick={handleRegister}
+                className="md:w-fit px-11 py-1 bg-[#f6f8fa]  rounded-lg font-medium border-[1.5px] border-gray-300 cursor-pointer text-sm shadow-xs w-full"
+              >
+                Register
+              </button>
+              <button
+                onClick={() => setShowForm(null)}
+                className="py-1 px-3 border border-gray-300 rounded-lg font-medium cursor-pointer text-sm">
+                Close
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
