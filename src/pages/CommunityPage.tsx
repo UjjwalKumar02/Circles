@@ -10,6 +10,7 @@ import { GoReply } from "react-icons/go";
 import Navbar from "../components/Navbar";
 import { IoMdAdd } from "react-icons/io";
 import { LuRefreshCw } from "react-icons/lu";
+import { io } from "socket.io-client";
 
 
 interface Community {
@@ -45,17 +46,57 @@ interface Author {
 
 const CommunityPage = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
   const { slug } = useParams();
+
   const [community, setCommunity] = useState<Community | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-
   const [showCreate, setShowCreate] = useState(false);
   const [content, setContent] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isAnnouncement, setIsAnnouncement] = useState(false);
-
   const [loading, setLoading] = useState(false);
+
+
+
+  useEffect(() => {
+    const socket = io(backendUrl, { withCredentials: true });
+
+    if (community?.id) {
+      socket.emit("join_community", community.id);
+    }
+
+    socket.on("new_post", (post) => {
+      console.log("New post recieved via socket:", post);
+      setCommunity((prev) => {
+        if (!prev) return prev;
+        return { ...prev, posts: [post, ...prev.posts] };
+      });
+    });
+
+
+    socket.on("update_like", (updatedPost) => {
+      console.log("Like updated:", updatedPost);
+      setCommunity((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          posts: prev.posts.map((p) =>
+            p.id === updatedPost.id
+              ? {
+                ...p,
+                likes: updatedPost.likes,
+                likedByUser: updatedPost.likedByUser ?? p.likedByUser,
+              }
+              : p
+          ),
+        };
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [community?.id, backendUrl]);
 
 
 
@@ -131,33 +172,119 @@ const CommunityPage = () => {
   }
 
 
+  // const handleClickLike = async (postId: string) => {
+  //   setCommunity(prev => {
+  //     if (!prev) return prev;
+  //     return {
+  //       ...prev,
+  //       posts: prev.posts.map(post => {
+  //         if (post.id === postId) {
+  //           const alreadyLiked = post.likedByUser;
+  //           const likeCount = post.likes.length;
+  //           return {
+  //             ...post,
+  //             likedByUser: !alreadyLiked,
+  //             likes: alreadyLiked
+  //               ? post.likes.slice(0, likeCount - 1)
+  //               : [...post.likes, { id: "temp", likedById: "temp" }],
+  //           };
+  //         }
+  //         return post;
+  //       })
+  //     }
+  //   });
+  //   await fetch(`${backendUrl}/api/communities/posts/${postId}/like`, {
+  //     method: 'POST',
+  //     credentials: "include",
+  //   });
+  //   console.log("updating likes...")
+  // };
+
+
+  // const handleClickLike = async (postId: string) => {
+  //   // Optimistically update UI
+  //   setCommunity((prev) => {
+  //     if (!prev) return prev;
+  //     return {
+  //       ...prev,
+  //       posts: prev.posts.map((p) => {
+  //         if (p.id !== postId) return p;
+  //         const alreadyLiked = p.likedByUser;
+  //         return {
+  //           ...p,
+  //           likedByUser: !alreadyLiked,
+  //           likes: alreadyLiked
+  //             ? p.likes.slice(0, -1)
+  //             : [...p.likes, { id: "temp", likedById: "temp" }],
+  //         };
+  //       }),
+  //     };
+  //   });
+
+  //   try {
+  //     const response = await fetch(`${backendUrl}/api/communities/posts/${postId}/like`, {
+  //       method: "POST",
+  //       credentials: "include",
+  //     });
+
+  //     if (!response.ok) throw new Error("Failed to toggle like");
+  //   } catch (err) {
+  //     console.error("Error toggling like:", err);
+  //     // revert optimistic update on error
+  //     setCommunity((prev) => {
+  //       if (!prev) return prev;
+  //       return {
+  //         ...prev,
+  //         posts: prev.posts.map((p) => {
+  //           if (p.id !== postId) return p;
+  //           const alreadyLiked = !p.likedByUser; // reverse it
+  //           return {
+  //             ...p,
+  //             likedByUser: alreadyLiked,
+  //             likes: alreadyLiked
+  //               ? [...p.likes, { id: "temp", likedById: "temp" }]
+  //               : p.likes.slice(0, -1),
+  //           };
+  //         }),
+  //       };
+  //     });
+  //   }
+  // };
+
+
+
   const handleClickLike = async (postId: string) => {
-    setCommunity(prev => {
+    setCommunity((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
-        posts: prev.posts.map(post => {
-          if (post.id === postId) {
-            const alreadyLiked = post.likedByUser;
-            const likeCount = post.likes.length;
-            return {
-              ...post,
-              likedByUser: !alreadyLiked,
-              likes: alreadyLiked
-                ? post.likes.slice(0, likeCount - 1)
-                : [...post.likes, { id: "temp", likedById: "temp" }],
-            };
-          }
-          return post;
-        })
-      }
+        posts: prev.posts.map((p) => {
+          if (p.id !== postId) return p;
+          const alreadyLiked = p.likedByUser;
+          const currentLikes = p.likes ?? []; // ✅ safeguard
+          return {
+            ...p,
+            likedByUser: !alreadyLiked,
+            likes: alreadyLiked
+              ? currentLikes.slice(0, -1)
+              : [...currentLikes, { id: "temp", likedById: "temp" }],
+          };
+        }),
+      };
     });
-    await fetch(`${backendUrl}/api/communities/posts/${postId}/like`, {
-      method: 'POST',
-      credentials: "include",
-    });
-    console.log("updating likes...")
+
+    try {
+      const res = await fetch(`${backendUrl}/api/communities/posts/${postId}/like`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to toggle like");
+    } catch (err) {
+      console.error("Error toggling like:", err);
+    }
   };
+
+
 
   const handleReply = (username: string) => {
     setContent("@" + username + " ");
@@ -176,9 +303,9 @@ const CommunityPage = () => {
         <div className="flex flex-col justify-start items-center lg:mt-5 mt-0 text-sm lg:w-[42%] w-full border-b-[1.5px] border-gray-300">
 
           <div className="w-full flex justify-between items-center bg-[#f6f8fa] text-[#1f2328] px-5.5 py-3.5 border-x-[1.5px] border-y-[1.5px] border-x-gray-300 border-t-gray-300 border-b-gray-200 lg:rounded-t-2xl shadow-xs">
-            
-            
-              <h2 className="lg:block hidden font-medium text-lg py-0.5">
+
+
+            <h2 className="lg:block hidden font-medium text-lg py-0.5">
               {community && community.name.charAt(0).toUpperCase() + community.name.slice(1)}
             </h2>
 
@@ -189,15 +316,15 @@ const CommunityPage = () => {
               {community && community.name.charAt(0).toUpperCase() + community.name.slice(1)}
               <LuRefreshCw size={18} color="" />
             </button>
-            
+
             <div className="flex items-center">
               <button
-              onClick={() => setShowCreate(!showCreate)}
-              className="lg:hidden block px-1 py-1 rounded-full  cursor-pointer"
-            >
-              <IoMdAdd size={24} color="black" />
-            </button>
-              
+                onClick={() => setShowCreate(!showCreate)}
+                className="lg:hidden block px-1 py-1 rounded-full  cursor-pointer"
+              >
+                <IoMdAdd size={24} color="black" />
+              </button>
+
             </div>
           </div>
 
@@ -234,7 +361,7 @@ const CommunityPage = () => {
                   onClick={() => handleClickLike(p.id)}
                   className={`${p.likedByUser ? 'text-[#0969da] heart-pop' : 'text-[#1f2328]'} flex items-center gap-1 cursor-pointer`}
                 >
-                  {!p.likedByUser ? <FaRegHeart size={16} /> : <FaHeart size={16} />} {p.likes.length}
+                  {!p.likedByUser ? <FaRegHeart size={16} /> : <FaHeart size={16} />} {p.likes?.length}
                 </button>
 
                 <button
@@ -312,7 +439,7 @@ const CommunityPage = () => {
               </form>
 
               <div className="flex items-center gap-2 mt- justify-between">
-                
+
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={() => setIsAnonymous(!isAnonymous)}
@@ -332,7 +459,7 @@ const CommunityPage = () => {
                 </div>
 
                 <button
-                  onClick={() => {setShowCreate(false); setContent("")}}
+                  onClick={() => { setShowCreate(false); setContent("") }}
                   className="bg-black text-white py-1 px-3 border border-gray-300 rounded-lg font-medium cursor-pointer text-sm lg:ml-14"
                 >
                   Close
