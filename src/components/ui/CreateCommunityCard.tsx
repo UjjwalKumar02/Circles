@@ -20,6 +20,11 @@ export const CreateCommunityCard = ({
   const handleCreate = async () => {
     try {
       setloading(true);
+      if (nameRef.current?.value === "" || descRef.current?.value === "") {
+        alert("All fields are required!");
+        return;
+      }
+      
       const res = await fetch(`${backendUrl}/api/community/create`, {
         method: "POST",
         headers: {

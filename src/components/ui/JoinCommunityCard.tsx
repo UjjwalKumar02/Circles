@@ -16,6 +16,10 @@ export const JoinCommunityCard = ({ setPopup, fetchUserCommunity }: Props) => {
   const handleJoin = async (id: number) => {
     try {
       setLoading(true);
+      if (idRef.current?.value === "") {
+        alert("Id field is required!");
+        return;
+      }
       const res = await fetch(`${backendUrl}/api/community/join/${id}`, {
         method: "POST",
         headers: {
@@ -40,7 +44,12 @@ export const JoinCommunityCard = ({ setPopup, fetchUserCommunity }: Props) => {
   return (
     <PopupCard>
       <h1 className="text-center text-2xl font-medium tracking-tight">Join</h1>
-      <InputBox reference={idRef} size="lg" type="text" placeholder="Community Id" />
+      <InputBox
+        reference={idRef}
+        size="lg"
+        type="text"
+        placeholder="Community Id"
+      />
 
       <div className="flex justify-between">
         <Button
