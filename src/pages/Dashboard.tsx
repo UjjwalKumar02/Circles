@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Button from "../components/ui/Button";
-import Titlebar from "../components/ui/Titlebar";
 import Wrapper from "../components/ui/Wrapper";
 import CommunityCard from "../components/ui/CommunityCard";
 import { CreateCommunityCard } from "../components/ui/CreateCommunityCard";
@@ -57,32 +56,42 @@ export default function Dashboard() {
           <p>loading...</p>
         </div>
       ) : (
-        <div className="w-full ml-66 mt-19">
-          <Titlebar title="Welcome" />
-          <div className="flex justify-center gap-4 mt-2">
+        <div className="w-full ml-60 mt-19 px-8 flex justify-between">
+          <div className="mt-6 space-y-7">
+            <h1 className="text-2xl font-medium tracking-tighter px-1.5">
+              Your Communities
+            </h1>
+
+            <div className="flex flex-wrap gap-4">
+              {responseData?.map((c: CommunityWithRole) => (
+                <CommunityCard
+                  key={c.community.id}
+                  role={c.role}
+                  name={c.community.name}
+                  description={c.community.description}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="min-w-60 flex flex-col h-fit gap-4 mt-6 border border-gray-300 py-8 px-6 mr-8  rounded-md">
+            <h1 className="text-center tracking-tight text-lg mb-6">
+              Add Community
+            </h1>
             <Button
-              variant="primary"
+              variant="secondary"
               size="md"
-              text="Create community"
+              text="Create a New One"
               onClick={() => setPopup("create")}
+              fullWidth={true}
             />
             <Button
               variant="secondary"
               size="md"
-              text="Join community"
+              text="Join by ID"
               onClick={() => setPopup("join")}
+              fullWidth={true}
             />
-          </div>
-
-          <div className="mt-8 flex gap-8">
-            {responseData?.map((c: CommunityWithRole) => (
-              <CommunityCard
-                key={c.community.id}
-                role={c.role}
-                name={c.community.name}
-                description={c.community.description}
-              />
-            ))}
           </div>
 
           {popup === "create" && (

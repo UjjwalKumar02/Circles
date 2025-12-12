@@ -12,13 +12,13 @@ export default function CommunityCard({
   role,
 }: CommunityCardProps) {
   return (
-    <div className="w-[22%] px-8 py-6 flex flex-col gap-8 border border-gray-200 rounded-lg">
+    <div className="w-72 px-10 py-8 flex flex-col gap-10 border border-gray-300 rounded-md">
       <div className="flex items-center justify-between">
         <p className="font-medium tracking-tighter text-lg">{name}</p>
         <p
-          className={`border px-2 py-0.5 rounded-lg text-sm ${
+          className={`border px-2 py-0.5 rounded-lg text-sm font-medium ${
             role === "ADMIN"
-              ? "text-green-500 border-green-500"
+              ? "text-purple-500 border-purple-500"
               : "text-blue-500 border-blue-500"
           }`}
         >
@@ -28,13 +28,13 @@ export default function CommunityCard({
 
       <p className="text-gray-900">{description}</p>
 
-      <Button
-        variant="primary"
+      {/* <Button
+        variant="secondary"
         size="md"
         text="Explore"
         onClick={() => console.log("first")}
         fullWidth={true}
-      />
+      /> */}
     </div>
   );
 }
