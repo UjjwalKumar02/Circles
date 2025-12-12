@@ -1,5 +1,3 @@
-import Button from "./Button";
-
 interface CommunityCardProps {
   name: string;
   description: string;
@@ -27,14 +25,6 @@ export default function CommunityCard({
       </div>
 
       <p className="text-gray-900">{description}</p>
-
-      {/* <Button
-        variant="secondary"
-        size="md"
-        text="Explore"
-        onClick={() => console.log("first")}
-        fullWidth={true}
-      /> */}
     </div>
   );
 }

@@ -10,7 +10,7 @@ interface InputBoxProps {
 
 export const InputBox = (props: InputBoxProps) => {
   const sizeStyles = {
-    sm: "text-gray-800 bg-blue-50 text-sm",
+    sm: "text-gray-800 bg-50 text-sm",
     fit: "",
     lg: "w-62",
   };
