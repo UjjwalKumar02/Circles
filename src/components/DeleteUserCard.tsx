@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { PopupCard } from "./PopupWrapper";
 import Button from "./Button";
-import { PopupCard } from "./PopupCard";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
@@ -35,13 +35,13 @@ export const DeleteUserCard = ({ setPopup }: Props) => {
 
   return (
     <PopupCard>
-      <h1 className="text-lg font-medium tracking-tight text-center mb-2">
-        Please confirm
+      <h1 className="text-xl font-medium tracking-tight mb-2">
+        Please confirm to delete
         <br />
-        to delete your account!
+        your account!
       </h1>
 
-      <div className="flex justify-between gap-6">
+      <div className="flex justify-between gap-4">
         <Button
           variant="primary"
           size="md"

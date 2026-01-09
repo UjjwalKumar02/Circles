@@ -1,0 +1,50 @@
+export interface EditCommunityProps {
+  setPopup: React.Dispatch<
+    React.SetStateAction<"edit" | "delete" | "exit" | null>
+  >;
+  communityId?: number;
+  communitName?: string;
+  communitDesc?: string;
+  fetchCommunityDetail: () => Promise<void>;
+}
+
+export interface ExitCommunityProps {
+  setPopup: React.Dispatch<
+    React.SetStateAction<"edit" | "delete" | "exit" | null>
+  >;
+  communityId?: number;
+}
+
+export interface CommunityPageResponseData {
+  id: number;
+  name: string;
+  description: string;
+  members: {
+    role: "ADMIN" | "MEMBER";
+  }[];
+  posts: {
+    id?: number;
+    content: string;
+    author: {
+      username: string;
+      avatar: string;
+    };
+    comments: {
+      id: number;
+    }[];
+    likes: {
+      id: number;
+    }[];
+    createdAt: Date;
+  }[];
+}
+
+export interface CommunityWithRole {
+  role: string;
+  community: {
+    id: number;
+    name: string;
+    slug: string;
+    description: string;
+  };
+}

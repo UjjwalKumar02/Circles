@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import Button from "../components/ui/Button";
-import Wrapper from "../components/ui/Wrapper";
-import { InputBox } from "../components/ui/InputBox";
-import EditProfileCard from "../components/ui/EditProfileCard";
-import { DeleteUserCard } from "../components/ui/DeleteUserCard";
+import Button from "../components/Button";
+import { InputBox } from "../components/InputBox";
+import EditProfileCard from "../components/EditProfileCard";
+import { DeleteUserCard } from "../components/DeleteUserCard";
+import { Nav } from "../components/Nav";
+import { Side } from "../components/Side";
 
 interface ResponseData {
   username: string;
@@ -42,75 +43,82 @@ export default function Profile() {
     fetchUserProfile();
   }, []);
 
-  return (
-    <Wrapper>
-      {loading ? (
-        <div className="w-full ml-66 mt-19">
-          <p>loading...</p>
-        </div>
-      ) : (
-        <div className="w-full ml-60 mt-19 px-8 flex justify-between">
-          <div className="mt-6 space-y-7 w-full">
-            <div className="flex pt-5 justify-center items-center gap-16 mb-10">
-              <img
-                src={responseData?.avatar}
-                alt="image"
-                className="w-50 h-50 border border-gray-300 rounded-4xl"
-              />
+  if (loading) return <div className="px-3">loading...</div>;
 
-              <div className="min-w-[20%] flex justify-between gap-10">
-                <ul className="space-y-6">
-                  <li>Username:</li>
-                  <li>Email:</li>
-                  <li>Description:</li>
-                </ul>
-                <div className="flex flex-col gap-3">
-                  <InputBox
-                    size="sm"
-                    type="text"
-                    value={responseData?.username}
-                    fullWidth={true}
-                    disabled={true}
-                  />
-                  <InputBox
-                    size="sm"
-                    type="text"
-                    value={responseData?.email}
-                    fullWidth={true}
-                    disabled={true}
-                  />
-                  <InputBox
-                    size="sm"
-                    type="text"
-                    value={responseData?.description || "null"}
-                    fullWidth={true}
-                    disabled={true}
-                  />
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Nav />
+      <div className="max-w-5xl mx-auto flex gap-8 justify-between mt-8">
+        {/* Side bar */}
+        <Side />
+
+        {/* Main content */}
+        <div className="w-full mt-2">
+          <div className="flex justify-between">
+            <h1 className="text-xl font-medium tracking-tight ">
+              Your Account
+            </h1>
+            <div className="flex gap-4 items-center">
+              <Button
+                variant="primary"
+                size="md"
+                text="Edit profile"
+                onClick={() => setPopup("edit")}
+              />
+              <Button
+                variant="primary"
+                size="md"
+                text="Delete Account"
+                onClick={() => setPopup("delete")}
+              />
+            </div>
+          </div>
+
+          {/* Profile */}
+          <div className="flex flex-col gap-5 mt-4">
+            <div className="space-y-7 w-full bg-white border border-gray-200 rounded-xl">
+              <div className="flex py-8 justify-center items-center gap-16">
+                <img
+                  src={responseData?.avatar}
+                  alt="image"
+                  className="w-38 h-38 border border-gray-300 rounded-4xl"
+                />
+
+                <div className="min-w-[20%] flex justify-between gap-9">
+                  <ul className="space-y-6">
+                    <li>Username:</li>
+                    <li>Email:</li>
+                    <li>Description:</li>
+                  </ul>
+                  <div className="flex flex-col gap-3">
+                    <InputBox
+                      size="sm"
+                      type="text"
+                      value={responseData?.username}
+                      fullWidth={true}
+                      disabled={true}
+                    />
+                    <InputBox
+                      size="sm"
+                      type="text"
+                      value={responseData?.email}
+                      fullWidth={true}
+                      disabled={true}
+                    />
+                    <InputBox
+                      size="sm"
+                      type="text"
+                      value={responseData?.description || "null"}
+                      fullWidth={true}
+                      disabled={true}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="min-w-60 flex flex-col h-fit gap-4 mt-6 border border-gray-300 py-8 px-6 mr-8  rounded-md">
-            <h1 className="text-center tracking-tight text-lg mb-6">
-              Profile Settings
-            </h1>
-            <Button
-              variant="secondary"
-              size="md"
-              text="Edit Details"
-              onClick={() => setPopup("edit")}
-              fullWidth={true}
-            />
-            <Button
-              variant="secondary"
-              size="md"
-              text="Delete Account"
-              onClick={() => setPopup("delete")}
-              fullWidth={true}
-            />
-          </div>
         </div>
-      )}
+      </div>
 
       {popup === "edit" && (
         <EditProfileCard
@@ -120,6 +128,6 @@ export default function Profile() {
       )}
 
       {popup === "delete" && <DeleteUserCard setPopup={setPopup} />}
-    </Wrapper>
+    </div>
   );
 }

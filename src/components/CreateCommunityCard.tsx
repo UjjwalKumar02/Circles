@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import Button from "./Button";
+import { PopupCard } from "./PopupWrapper";
 import { InputBox } from "./InputBox";
-import { PopupCard } from "./PopupCard";
+import Button from "./Button";
 
 interface Props {
   setPopup: React.Dispatch<React.SetStateAction<"create" | "join" | null>>;
@@ -24,7 +24,7 @@ export const CreateCommunityCard = ({
         alert("All fields are required!");
         return;
       }
-      
+
       const res = await fetch(`${backendUrl}/api/community/create`, {
         method: "POST",
         headers: {
@@ -57,13 +57,13 @@ export const CreateCommunityCard = ({
       </h1>
       <InputBox
         reference={nameRef}
-        size="lg"
+        size="md"
         type="text"
         placeholder="Community Name"
       />
       <InputBox
         reference={descRef}
-        size="lg"
+        size="md"
         type="text"
         placeholder="Community Description"
       />

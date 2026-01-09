@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import Button from "./Button";
+import { PopupCard } from "./PopupWrapper";
 import { InputBox } from "./InputBox";
-import { PopupCard } from "./PopupCard";
+import Button from "./Button";
 
 interface Props {
   setPopup: React.Dispatch<React.SetStateAction<"create" | "join" | null>>;
@@ -13,7 +13,7 @@ export const JoinCommunityCard = ({ setPopup, fetchUserCommunity }: Props) => {
   const idRef = useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleJoin = async (id: number) => {
+  const handleJoin = async (id: string) => {
     try {
       setLoading(true);
       if (idRef.current?.value === "") {
@@ -46,7 +46,7 @@ export const JoinCommunityCard = ({ setPopup, fetchUserCommunity }: Props) => {
       <h1 className="text-center text-2xl font-medium tracking-tight">Join</h1>
       <InputBox
         reference={idRef}
-        size="lg"
+        size="md"
         type="text"
         placeholder="Community Id"
       />
@@ -56,7 +56,7 @@ export const JoinCommunityCard = ({ setPopup, fetchUserCommunity }: Props) => {
           variant="primary"
           size="md"
           text="Join"
-          onClick={() => handleJoin(Number(idRef.current?.value))}
+          onClick={() => handleJoin(idRef.current?.value!)}
           disabled={loading ? true : false}
         />
         <Button

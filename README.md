@@ -1,23 +1,17 @@
 # Circles
 
-1. Basic frontend for testing
-2. ui
-3. search (debounce, hook)
-4. Protected route
-5. useFetch hook
-6. change community id to uuid
+A community based social platform.
 
-# dashboard
-- create
-- join
-- fetch and show
-- somewhat completed
+![app](public/app.png)
 
-# community
-# profile
+## Tech Stacks
 
+- **Frontend**: React.js, TypeScript, TailwindCSS
+- **Backend**: https://github.com/UjjwalKumar02/Circles-backend
 
+## Features
 
-- make components one by one for dashboard
-- make the whole working
-- then move to next page
+- Create and join interest-based communities
+- Google Authentication for secure and easy sign-in
+- Role-based access: members and admins
+- Responsive, user-friendly UI for smooth navigation

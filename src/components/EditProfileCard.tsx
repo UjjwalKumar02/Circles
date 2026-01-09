@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
-import Button from "./Button";
+import { PopupCard } from "./PopupWrapper";
 import { InputBox } from "./InputBox";
-import { PopupCard } from "./PopupCard";
+import Button from "./Button";
 
 interface Props {
   setPopup: React.Dispatch<React.SetStateAction<"edit" | "delete" | null>>;
@@ -57,13 +57,13 @@ export default function EditProfileCard({ setPopup, fetchUserProfile }: Props) {
         reference={usernameRef}
         type="text"
         placeholder="Username"
-        size="lg"
+        size="md"
       />
       <InputBox
         reference={descriptionRef}
         type="text"
         placeholder="Description"
-        size="lg"
+        size="md"
       />
       <div className="flex justify-between">
         <Button
