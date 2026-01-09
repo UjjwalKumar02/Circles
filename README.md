@@ -2,7 +2,7 @@
 
 A community based social platform.
 
-![app](public/app.png)
+![app](public/app2.png)
 
 ## Tech Stacks
 
