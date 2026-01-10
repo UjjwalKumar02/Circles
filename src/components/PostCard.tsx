@@ -22,7 +22,6 @@ export default function PostCard({
   avatar,
   content,
   likeCount,
-  commentCount,
   createdAt,
   onClickLike,
 }: PostCardProps) {
