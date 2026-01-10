@@ -1,4 +1,6 @@
 export default function Landing() {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
   return (
     <div className="min-h-screen flex flex-col justify-between">
       <div className="w-5xl mx-auto flex justify-between items-center px-5 py-6">
@@ -22,8 +24,7 @@ export default function Landing() {
         <button
           className="bg-black text-gray-100 px-7 py-1.5 rounded-xl font-medium cursor-pointer"
           onClick={() =>
-            (window.location.href =
-              "http://localhost:3000/api/user/auth/google")
+            (window.location.href = `${backendUrl}/api/user/auth/google`)
           }
         >
           Sign in with Google &gt;
