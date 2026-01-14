@@ -7,6 +7,8 @@ import { Nav } from "../components/Nav";
 import { Side } from "../components/Side";
 import { Community } from "../components/CommunityCard";
 import type { CommunityWithRole } from "../types/types";
+import { Add } from "../icons/Add";
+import { Close } from "../icons/Close";
 
 export default function Home() {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -15,6 +17,7 @@ export default function Home() {
     null
   );
   const [loading, setLoading] = useState(false);
+  const [mobileAdd, setMobileAdd] = useState(false);
 
   const fetchUserCommunities = async () => {
     try {
@@ -47,18 +50,18 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Nav />
-      <div className="max-w-5xl mx-auto flex gap-8 justify-between mt-8">
+      <div className="max-w-4xl mx-auto flex gap-6 justify-between mt-8">
         {/* Side bar */}
 
         <Side />
 
         {/* Main content */}
-        <div className="w-full mt-2">
+        <div className="w-full mt-2 px-6">
           <div className="flex justify-between">
             <h1 className="text-xl font-medium tracking-tight ">
               Your Communities
             </h1>
-            <div className="flex gap-4 items-center">
+            <div className="md:flex hidden gap-4 items-center">
               <Button
                 variant="primary"
                 size="md"
@@ -72,9 +75,35 @@ export default function Home() {
                 onClick={() => setPopup("join")}
               />
             </div>
-          </div>
 
-          <div className="flex flex-col gap-5 mt-4">
+            {/* Mobile add button */}
+            <button
+              className="md:hidden block"
+              onClick={() => setMobileAdd(!mobileAdd)}
+            >
+              {mobileAdd ? <Close /> : <Add />}
+            </button>
+          </div>
+          {mobileAdd && (
+            <div className="p-6 flex flex-col gap-4">
+              <Button
+                variant="primary"
+                size="sm"
+                text="Create New"
+                onClick={() => setPopup("create")}
+                fullWidth={true}
+              />
+              <Button
+                variant="primary"
+                size="sm"
+                text="Join by ID"
+                onClick={() => setPopup("join")}
+                fullWidth={true}
+              />
+            </div>
+          )}
+
+          <div className="flex flex-col gap-5 mt-6">
             {responseData?.length === 0 ? (
               <p>You dont have any communities!</p>
             ) : (

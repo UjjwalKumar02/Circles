@@ -5,6 +5,8 @@ import EditProfileCard from "../components/EditProfileCard";
 import { DeleteUserCard } from "../components/DeleteUserCard";
 import { Nav } from "../components/Nav";
 import { Side } from "../components/Side";
+import { Add } from "../icons/Add";
+import { Close } from "../icons/Close";
 
 interface ResponseData {
   username: string;
@@ -18,6 +20,7 @@ export default function Profile() {
   const [responseData, setResponseData] = useState<ResponseData | null>(null);
   const [loading, setLoading] = useState(false);
   const [popup, setPopup] = useState<"edit" | "delete" | null>(null);
+  const [mobileAdd, setMobileAdd] = useState(false);
 
   const fetchUserProfile = async () => {
     try {
@@ -48,17 +51,17 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Nav />
-      <div className="max-w-5xl mx-auto flex gap-8 justify-between mt-8">
+      <div className="max-w-4xl mx-auto flex gap-8 justify-between mt-8">
         {/* Side bar */}
         <Side />
 
         {/* Main content */}
-        <div className="w-full mt-2">
+        <div className="w-full mt-2 px-6">
           <div className="flex justify-between">
             <h1 className="text-xl font-medium tracking-tight ">
               Your Account
             </h1>
-            <div className="flex gap-4 items-center">
+            <div className="md:flex hidden gap-4 items-center">
               <Button
                 variant="primary"
                 size="md"
@@ -72,12 +75,39 @@ export default function Profile() {
                 onClick={() => setPopup("delete")}
               />
             </div>
+
+            {/* Mobile Btn */}
+
+            <button
+              className="md:hidden block"
+              onClick={() => setMobileAdd(!mobileAdd)}
+            >
+              {mobileAdd ? <Close /> : <Add />}
+            </button>
           </div>
+          {mobileAdd && (
+            <div className="p-6 flex flex-col gap-4">
+              <Button
+                variant="primary"
+                size="sm"
+                text="Edit profile"
+                onClick={() => setPopup("edit")}
+                fullWidth={true}
+              />
+              <Button
+                variant="primary"
+                size="sm"
+                text="Delete Account"
+                onClick={() => setPopup("delete")}
+                fullWidth={true}
+              />
+            </div>
+          )}
 
           {/* Profile */}
           <div className="flex flex-col gap-5 mt-4">
-            <div className="space-y-7 w-full bg-white border border-gray-200 rounded-xl">
-              <div className="flex py-8 justify-center items-center gap-16">
+            <div className="space-y-7 w-full bg-white border border-gray-200 rounded-2xl shadow-xs">
+              <div className="flex md:flex-row flex-col py-8 justify-center items-center gap-16">
                 <img
                   src={responseData?.avatar}
                   alt="image"

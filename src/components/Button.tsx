@@ -9,7 +9,7 @@ interface ButtonProps {
 
 export default function Button(props: ButtonProps) {
   const variantStyles = {
-    primary: "bg-blue-500 text-white hover:bg-blue-400 font-medium",
+    primary: "bg-sky-500 text-white hover:bg-sky-400 font-medium",
     secondary: "border border-gray-300 bg-gray-50 text-gray-700 font-medium",
   };
   const sizeStyles = {

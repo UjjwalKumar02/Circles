@@ -36,7 +36,9 @@ export default function PostCard({
           />
           <p className="font-medium tracking-tight">{author}</p>
 
-          <p className="text-sm text-sky-600">{formatDate(createdAt)}</p>
+          <p className="md:block hidden text-sm text-sky-600">
+            {formatDate(createdAt)}
+          </p>
         </div>
 
         <div className="flex items-center gap-6 text-sm pl-1 pt-1">
@@ -53,6 +55,9 @@ export default function PostCard({
       </div>
 
       <p className="text-gray-800 pl-1 text-lg tracking-">{content}</p>
+      <p className="md:hidden block text-sx text-sky-600">
+        {formatDate(createdAt)}
+      </p>
     </div>
   );
 }
