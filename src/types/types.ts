@@ -65,6 +65,7 @@ export interface Post {
   createdAt: Date;
   likeCount: number;
   commentCount?: number;
+  isLiked?: boolean;
 }
 
 export interface ProfileData {

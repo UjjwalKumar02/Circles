@@ -29,7 +29,7 @@ export default function Community() {
   const [loading, setLoading] = useState(false);
   const [mobileSettings, setMobileSettings] = useState(false);
   const [postList, setPostList] = useState<Post[]>([]);
-  const [isLiked, setIsLiked] = useState(false);
+  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
 
   // Fetch community details
   const fetchCommunityDetail = async () => {
@@ -202,7 +202,6 @@ export default function Community() {
     }
   };
 
-  // Toggle like handler
   const toggleLike = async ({
     postId,
     index,
@@ -210,20 +209,26 @@ export default function Community() {
     postId: number;
     index: number;
   }) => {
+    const alreadyLiked = likedPosts.has(postId);
+
+    setLikedPosts((prev) => {
+      const newSet = new Set(prev);
+      alreadyLiked ? newSet.delete(postId) : newSet.add(postId);
+      return newSet;
+    });
+
+    const post = postList[index];
+
     try {
       // sending liked post details to websocket
-      let nextLikedState = !isLiked;
-      setIsLiked((prev) => !prev);
-
-      const post = postList[index];
       socket?.send(
         JSON.stringify({
           type: "toggle_like",
           roomId: slug,
-          index: index,
+          index,
           message: {
             ...post,
-            likeCount: nextLikedState ? post.likeCount + 1 : post.likeCount - 1,
+            likeCount: alreadyLiked ? post.likeCount - 1 : post.likeCount + 1,
           },
         })
       );
@@ -233,9 +238,6 @@ export default function Community() {
         method: "POST",
         credentials: "include",
       });
-
-      // cleaning like state
-      setIsLiked((prev) => !prev);
     } catch (error) {
       console.log(error);
       throw new Error("Request failed");
