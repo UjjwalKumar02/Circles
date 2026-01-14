@@ -10,47 +10,26 @@ import { Nav } from "../components/Nav";
 import { Side } from "../components/Side";
 import { Close } from "../icons/Close";
 import { Settings } from "../icons/Settings";
-
-interface CommunityDetails {
-  id: string;
-  name: string;
-  description: string;
-  posts: Post[];
-  role: string;
-}
-
-interface Post {
-  id: number;
-  content: string;
-  authorName: string;
-  authorAvatar: string;
-  createdAt: Date;
-  likeCount: number;
-  commentCount?: number;
-}
-
-interface ProfileData {
-  username: string;
-  email: string;
-  avatar: string;
-  description: string;
-}
+import type { CommunityDetails, Post, ProfileData } from "../types/types";
 
 export default function Community() {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const { slug } = useParams();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  // Response data and wbsocket state variables
   const [responseData, setResponseData] = useState<CommunityDetails | null>(
     null
   );
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [socket, setSocket] = useState<WebSocket | null>(null);
 
+  // Other utility state variables
   const [popup, setPopup] = useState<"edit" | "delete" | "exit" | null>(null);
   const newPostRef = useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [mobileSettings, setMobileSettings] = useState(false);
-  const [socket, setSocket] = useState<WebSocket | null>(null);
   const [postList, setPostList] = useState<Post[]>([]);
-  console.log(postList);
+  const [isLiked, setIsLiked] = useState(false);
 
   // Fetch community details
   const fetchCommunityDetail = async () => {
@@ -93,6 +72,7 @@ export default function Community() {
     }
   };
 
+  // Fetch profile details for the websocket messages
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
@@ -105,7 +85,7 @@ export default function Community() {
       }
       const jsonData = await res.json();
       setProfileData(jsonData);
-      console.log(jsonData);
+      // console.log(jsonData);
     } catch (error) {
       console.log(error);
     } finally {
@@ -128,34 +108,45 @@ export default function Community() {
       );
     };
 
-    if (ws) {
-      setSocket(ws);
-    } else {
-      alert("Websocket connection failed!");
-    }
+    setSocket(ws);
 
     return () => {
       ws.close();
     };
   }, []);
 
-  // Incoming ws data
+  // Incoming websocket data
   if (socket) {
     socket.onmessage = (e) => {
-      const post = JSON.parse(e.data).post;
-      setPostList((prev) => [
-        {
-          id: post.id,
-          content: post.content,
-          createdAt: post.createdAt,
-          likeCount: post.likeCount,
-          commentCount: post.commentCount,
-          authorName: post.authorName,
-          authorAvatar: post.authorAvatar,
-        },
-        ...prev,
-      ]);
-      console.log(postList);
+      const parsedData = JSON.parse(e.data);
+
+      // If the type is chat
+      if (parsedData.type === "chat") {
+        const post = parsedData.post;
+
+        setPostList((prev) => [
+          {
+            id: post.id,
+            content: post.content,
+            createdAt: post.createdAt,
+            likeCount: post.likeCount,
+            commentCount: post.commentCount,
+            authorName: post.authorName,
+            authorAvatar: post.authorAvatar,
+          },
+          ...prev,
+        ]);
+      }
+
+      // If type is toggle_like
+      if (parsedData.type === "toggle_like") {
+        const post = parsedData.post;
+
+        setPostList((prev) =>
+          prev.map((p, i) => (i === parsedData.index ? post : p))
+        );
+      }
+      // console.log(postList);
     };
   }
 
@@ -202,6 +193,7 @@ export default function Community() {
         return;
       }
 
+      // Cleaning new post ref
       if (newPostRef.current) {
         newPostRef.current.value = "";
       }
@@ -211,14 +203,36 @@ export default function Community() {
   };
 
   // Toggle like handler
-  const toggleLike = async (postId: number) => {
+  const toggleLike = async ({
+    postId,
+    index,
+  }: {
+    postId: number;
+    index: number;
+  }) => {
     try {
+      // sending liked post details to websocket
+      let nextLikedState = !isLiked;
+      setIsLiked((prev) => !prev);
+
+      const post = postList[index];
+      socket?.send(
+        JSON.stringify({
+          type: "toggle_like",
+          roomId: slug,
+          index: index,
+          message: {
+            ...post,
+            likeCount: nextLikedState ? post.likeCount + 1 : post.likeCount - 1,
+          },
+        })
+      );
+
+      // Updating like details in db
       await fetch(`${backendUrl}/api/post/${postId}/like`, {
         method: "POST",
         credentials: "include",
       });
-
-      fetchCommunityDetail();
     } catch (error) {
       console.log(error);
       throw new Error("Request failed");
@@ -236,6 +250,7 @@ export default function Community() {
 
         {/* Main content */}
         <div className="w-full px-2">
+          {/* Community Header */}
           <div className="bg-white px-9 py-10 flex flex-col gap-7 border border-gray-200 rounded-xl">
             <div className="flex justify-between">
               {/* Community name and role */}
@@ -332,8 +347,8 @@ export default function Community() {
 
           {/* Posts */}
           <div className="flex flex-col gap-2 mt-2">
+            {/*Create new post box*/}
             <div className="bg-white border border-gray-200 rounded-xl px-8 py-4 space-y-4">
-              {/*Create new post box*/}
               <div className="flex gap-2">
                 <InputBox
                   reference={newPostRef}
@@ -353,17 +368,20 @@ export default function Community() {
             </div>
 
             {/* All posts */}
-            {postList.map((p) => (
-              <PostCard
-                author={p.authorName}
-                avatar={p.authorAvatar}
-                content={p.content}
-                likeCount={p.likeCount}
-                commentCount={p.commentCount ?? 0}
-                createdAt={p.createdAt}
-                onClickLike={() => toggleLike(p.id!)}
-              />
-            ))}
+            {postList.length !== 0 &&
+              postList.map((p, index) => (
+                <div key={index}>
+                  <PostCard
+                    author={p.authorName}
+                    avatar={p.authorAvatar}
+                    content={p.content}
+                    likeCount={p.likeCount}
+                    commentCount={p.commentCount ?? 0}
+                    createdAt={p.createdAt}
+                    onClickLike={() => toggleLike({ postId: p.id, index })}
+                  />
+                </div>
+              ))}
           </div>
         </div>
       </div>

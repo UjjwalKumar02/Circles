@@ -48,3 +48,28 @@ export interface CommunityWithRole {
     description: string;
   };
 }
+
+export interface CommunityDetails {
+  id: string;
+  name: string;
+  description: string;
+  posts: Post[];
+  role: string;
+}
+
+export interface Post {
+  id: number;
+  content: string;
+  authorName: string;
+  authorAvatar: string;
+  createdAt: Date;
+  likeCount: number;
+  commentCount?: number;
+}
+
+export interface ProfileData {
+  username: string;
+  email: string;
+  avatar: string;
+  description: string;
+}

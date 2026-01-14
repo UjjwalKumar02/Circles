@@ -7,7 +7,7 @@ export function Community({
   name: string;
   role: string;
   desc: string;
-  key: string;
+  key?: string;
 }) {
   return (
     <div

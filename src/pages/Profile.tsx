@@ -34,7 +34,7 @@ export default function Profile() {
       }
       const jsonData = await res.json();
       setResponseData(jsonData);
-      console.log(jsonData);
+      // console.log(jsonData);
     } catch (error) {
       console.log(error);
     } finally {

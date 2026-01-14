@@ -33,7 +33,7 @@ export default function Home() {
 
       const jsonData = await response.json();
       setResponseData(jsonData);
-      console.log(responseData);
+      // console.log(responseData);
     } catch (error) {
       console.log(error);
     } finally {
@@ -107,15 +107,17 @@ export default function Home() {
             {responseData?.length === 0 ? (
               <p>You dont have any communities!</p>
             ) : (
-              responseData?.map((c) => (
-                <Link to={`/community/${c.community.slug}`}>
+              responseData?.map((c, index) => (
+                <div className="" key={index}>
+                  <Link to={`/community/${c.community.slug}`}>
                   <Community
-                    key={c.community.id as unknown as string}
+                    // key={c.community.id as unknown as string}
                     role={c.role}
                     name={c.community.name}
                     desc={c.community.description}
                   />
                 </Link>
+                </div>
               ))
             )}
           </div>
