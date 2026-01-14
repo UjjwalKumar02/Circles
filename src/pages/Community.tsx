@@ -233,6 +233,9 @@ export default function Community() {
         method: "POST",
         credentials: "include",
       });
+
+      // cleaning like state
+      setIsLiked((prev) => !prev);
     } catch (error) {
       console.log(error);
       throw new Error("Request failed");
