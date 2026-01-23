@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Landing from "./pages/Landing";
+import Landing from "./componentsV2//Landing";
 import Profile from "./pages/Profile";
 import Community from "./pages/Community";
 import Home from "./pages/Home";
