@@ -2,7 +2,7 @@ export interface EditCommunityProps {
   setPopup: React.Dispatch<
     React.SetStateAction<"edit" | "delete" | "exit" | null>
   >;
-  communityId?: number;
+  communityId?: string;
   communitName?: string;
   communitDesc?: string;
   fetchCommunityDetail: () => Promise<void>;
@@ -12,7 +12,7 @@ export interface ExitCommunityProps {
   setPopup: React.Dispatch<
     React.SetStateAction<"edit" | "delete" | "exit" | null>
   >;
-  communityId?: number;
+  communityId?: string;
 }
 
 export interface CommunityPageResponseData {

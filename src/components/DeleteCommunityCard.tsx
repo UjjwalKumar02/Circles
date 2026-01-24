@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { PopupCard } from "./PopupWrapper";
-import Button from "./Button";
 import { useNavigate } from "react-router-dom";
+import { ButtonV2 } from "../componentsV2/ButtonV2";
 
 interface Props {
   setPopup: React.Dispatch<
     React.SetStateAction<"edit" | "delete" | "exit" | null>
   >;
-  communityId?: number;
+  communityId?: string;
 }
 
 export const DeleteCommunityCard = ({ setPopup, communityId }: Props) => {
@@ -24,14 +24,14 @@ export const DeleteCommunityCard = ({ setPopup, communityId }: Props) => {
         {
           method: "DELETE",
           credentials: "include",
-        }
+        },
       );
 
       if (!res.ok) {
         throw new Error("Request failed!");
       }
 
-      navigate("/dashboard");
+      navigate("/home");
     } catch (error) {
       console.log(error);
     } finally {
@@ -50,21 +50,22 @@ export const DeleteCommunityCard = ({ setPopup, communityId }: Props) => {
         </h1>
 
         <div className="flex justify-between gap-4">
-          <Button
+          <ButtonV2
             variant="primary"
             size="md"
-            text="Delete"
             onClick={handleDelete}
             disabled={loading}
-            fullWidth={true}
-          />
-          <Button
+            loading={loading}
+          >
+            Delete
+          </ButtonV2>
+          <ButtonV2
             variant="secondary"
             size="md"
-            text="Cancel"
             onClick={() => setPopup(null)}
-            fullWidth={true}
-          />
+          >
+            Cancel
+          </ButtonV2>
         </div>
       </div>
     </PopupCard>

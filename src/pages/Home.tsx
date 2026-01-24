@@ -1,23 +1,24 @@
 import { useEffect, useState } from "react";
-import Button from "../components/Button";
 import { CreateCommunityCard } from "../components/CreateCommunityCard";
 import { JoinCommunityCard } from "../components/JoinCommunityCard";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Nav } from "../components/Nav";
 import { Side } from "../components/Side";
 import { Community } from "../components/CommunityCard";
 import type { CommunityWithRole } from "../types/types";
 import { Add } from "../icons/Add";
 import { Close } from "../icons/Close";
+import { ButtonV2 } from "../componentsV2/ButtonV2";
 
 export default function Home() {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [popup, setPopup] = useState<"create" | "join" | null>(null);
   const [responseData, setResponseData] = useState<CommunityWithRole[] | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(false);
   const [mobileAdd, setMobileAdd] = useState(false);
+  const navigate = useNavigate();
 
   const fetchUserCommunities = async () => {
     try {
@@ -26,6 +27,11 @@ export default function Home() {
         method: "GET",
         credentials: "include",
       });
+      // Route protection
+      if (response.status === 405) {
+        navigate("/");
+        return;
+      }
 
       if (!response.ok) {
         throw new Error("Request failed");
@@ -48,7 +54,7 @@ export default function Home() {
   if (loading) return <div className="px-3">loading...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#fffffc]">
       <Nav />
       <div className="max-w-4xl mx-auto flex gap-6 justify-between mt-8">
         {/* Side bar */}
@@ -57,23 +63,25 @@ export default function Home() {
 
         {/* Main content */}
         <div className="w-full mt-2 px-6">
-          <div className="flex justify-between">
+          <div className="flex items-center justify-between">
             <h1 className="text-xl font-medium tracking-tight ">
               Your Communities
             </h1>
-            <div className="md:flex hidden gap-4 items-center">
-              <Button
-                variant="primary"
+            <div className="md:flex hidden gap-3 items-center">
+              <ButtonV2
+                variant="secondary"
                 size="md"
-                text="Create New"
                 onClick={() => setPopup("create")}
-              />
-              <Button
-                variant="primary"
+              >
+                Create New
+              </ButtonV2>
+              <ButtonV2
+                variant="secondary"
                 size="md"
-                text="Join by ID"
                 onClick={() => setPopup("join")}
-              />
+              >
+                Join with ID
+              </ButtonV2>
             </div>
 
             {/* Mobile add button */}
@@ -86,38 +94,35 @@ export default function Home() {
           </div>
           {mobileAdd && (
             <div className="p-6 flex flex-col gap-4">
-              <Button
-                variant="primary"
-                size="sm"
-                text="Create New"
+              <ButtonV2
+                variant="secondary"
+                size="md"
                 onClick={() => setPopup("create")}
-                fullWidth={true}
-              />
-              <Button
-                variant="primary"
-                size="sm"
-                text="Join by ID"
+              >
+                Create New
+              </ButtonV2>
+              <ButtonV2
+                variant="secondary"
+                size="md"
                 onClick={() => setPopup("join")}
-                fullWidth={true}
-              />
+              >
+                Join with ID
+              </ButtonV2>
             </div>
           )}
 
-          <div className="flex flex-col gap-5 mt-6">
+          <div className="flex flex-col gap-4 mt-6">
             {responseData?.length === 0 ? (
               <p>You dont have any communities!</p>
             ) : (
               responseData?.map((c, index) => (
-                <div className="" key={index}>
-                  <Link to={`/community/${c.community.slug}`}>
-                  <Community
-                    // key={c.community.id as unknown as string}
-                    role={c.role}
-                    name={c.community.name}
-                    desc={c.community.description}
-                  />
-                </Link>
-                </div>
+                <Community
+                  key={index}
+                  role={c.role}
+                  name={c.community.name}
+                  slug={c.community.slug}
+                  desc={c.community.description}
+                />
               ))
             )}
           </div>

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { PopupCard } from "./PopupWrapper";
 import { InputBox } from "./InputBox";
-import Button from "./Button";
+import { ButtonV2 } from "../componentsV2/ButtonV2";
 
 interface Props {
   setPopup: React.Dispatch<React.SetStateAction<"create" | "join" | null>>;
@@ -52,19 +52,18 @@ export const JoinCommunityCard = ({ setPopup, fetchUserCommunity }: Props) => {
       />
 
       <div className="flex justify-between">
-        <Button
+        <ButtonV2
           variant="primary"
           size="md"
-          text="Join"
           onClick={() => handleJoin(idRef.current?.value!)}
-          disabled={loading ? true : false}
-        />
-        <Button
-          variant="secondary"
-          size="md"
-          text="Cancel"
-          onClick={() => setPopup(null)}
-        />
+          disabled={loading}
+          loading={loading}
+        >
+          Join
+        </ButtonV2>
+        <ButtonV2 variant="secondary" size="md" onClick={() => setPopup(null)}>
+          Cancel
+        </ButtonV2>
       </div>
     </PopupCard>
   );

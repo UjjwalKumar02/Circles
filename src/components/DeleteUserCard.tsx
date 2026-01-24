@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PopupCard } from "./PopupWrapper";
-import Button from "./Button";
 import { useNavigate } from "react-router-dom";
+import { ButtonV2 } from "../componentsV2/ButtonV2";
 
 interface Props {
   setPopup: React.Dispatch<React.SetStateAction<"edit" | "delete" | null>>;
@@ -42,19 +42,18 @@ export const DeleteUserCard = ({ setPopup }: Props) => {
       </h1>
 
       <div className="flex justify-between gap-4">
-        <Button
+        <ButtonV2
           variant="primary"
           size="md"
-          text="Delete"
           onClick={handleDelete}
+          loading={loading}
           disabled={loading}
-        />
-        <Button
-          variant="secondary"
-          size="md"
-          text="Cancel"
-          onClick={() => setPopup(null)}
-        />
+        >
+          Delete
+        </ButtonV2>
+        <ButtonV2 variant="secondary" size="md" onClick={() => setPopup(null)}>
+          Cancel
+        </ButtonV2>
       </div>
     </PopupCard>
   );

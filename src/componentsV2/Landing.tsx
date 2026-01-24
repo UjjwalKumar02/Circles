@@ -1,28 +1,29 @@
+import { useNavigate } from "react-router-dom";
 import { EnterIcon } from "../iconsV2/EnterIcon";
+import { ButtonV2 } from "./ButtonV2";
 
 export default function Landing() {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col bg-[#fffffc]">
       {/* Nav */}
       <div className="border-b border-gray-100">
         <div className="max-w-300 mx-auto flex justify-between items-center py-4 lg:px-0 px-4">
-          <div className="flex gap-1.5 items-center">
-            <div className="bg-[#fde89e] h-8 w-8 flex items-center justify-center rounded-lg font-medium text-xl border border-gray-100">
+          <div className="flex gap-1 items-center">
+            <div className="bg-[#fde89e] h-7 w-7 flex items-center justify-center rounded-lg font-medium text-xl border border-gray-100">
               @
             </div>
             <h1 className="text-2xl font-medium tracking-tighter">Circles</h1>
           </div>
 
-          <button
-            onClick={() =>
-              (window.location.href = `${backendUrl}/api/user/auth/google`)
-            }
-            className="py-2 px-4 text-sm font-medium border-2 border-gray-200 rounded-xl shadow cursor-pointer"
+          <ButtonV2
+            variant="secondary"
+            size="md"
+            onClick={() => navigate("/auth")}
           >
             Sign In
-          </button>
+          </ButtonV2>
         </div>
       </div>
 
@@ -35,15 +36,25 @@ export default function Landing() {
           share similar interests
         </h1>
 
-        <button
-          onClick={() =>
-            (window.location.href = `${backendUrl}/api/user/auth/google`)
-          }
-          className="mt-3 bg-black text-gray-100 font-medium px-4 py-2 md:px-7 md:py-3 rounded-xl text-sm flex items-center gap-1 cursor-pointer"
+        <ButtonV2
+          variant="primary"
+          size="lg"
+          onClick={() => navigate("/auth")}
+          className="md:flex hidden items-center gap-1 mt-3"
         >
           Get Started
           <EnterIcon />
-        </button>
+        </ButtonV2>
+        {/* Mobile btn */}
+        <ButtonV2
+          variant="primary"
+          size="md"
+          onClick={() => navigate("/auth")}
+          className="md:hidden flex items-center gap-1 mt-3"
+        >
+          Get Started
+          <EnterIcon />
+        </ButtonV2>
       </div>
 
       {/* Features */}
@@ -106,15 +117,25 @@ export default function Landing() {
           share similar interests
         </h1>
 
-        <button
-          onClick={() =>
-            (window.location.href = `${backendUrl}/api/user/auth/google`)
-          }
-          className="mt-3 bg-black text-gray-100 font-medium px-4 py-2 md:px-7 md:py-3 rounded-xl text-sm flex items-center gap-1 cursor-pointer"
+        <ButtonV2
+          variant="primary"
+          size="lg"
+          onClick={() => navigate("/auth")}
+          className="md:flex hidden items-center gap-1 mt-3"
         >
           Get Started
           <EnterIcon />
-        </button>
+        </ButtonV2>
+        {/* Mobile btn */}
+        <ButtonV2
+          variant="primary"
+          size="md"
+          onClick={() => navigate("/auth")}
+          className="md:hidden flex items-center gap-1 mt-3"
+        >
+          Get Started
+          <EnterIcon />
+        </ButtonV2>
       </div>
 
       {/* Footer */}

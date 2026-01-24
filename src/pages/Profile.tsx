@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Button from "../components/Button";
 import { InputBox } from "../components/InputBox";
 import EditProfileCard from "../components/EditProfileCard";
 import { DeleteUserCard } from "../components/DeleteUserCard";
@@ -7,6 +6,8 @@ import { Nav } from "../components/Nav";
 import { Side } from "../components/Side";
 import { Add } from "../icons/Add";
 import { Close } from "../icons/Close";
+import { useNavigate } from "react-router-dom";
+import { ButtonV2 } from "../componentsV2/ButtonV2";
 
 interface ResponseData {
   username: string;
@@ -21,6 +22,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [popup, setPopup] = useState<"edit" | "delete" | null>(null);
   const [mobileAdd, setMobileAdd] = useState(false);
+  const navigate = useNavigate();
 
   const fetchUserProfile = async () => {
     try {
@@ -29,6 +31,12 @@ export default function Profile() {
         method: "GET",
         credentials: "include",
       });
+      // Route protection
+      if (res.status === 405) {
+        navigate("/");
+        return;
+      }
+
       if (!res.ok) {
         throw new Error("Request failed");
       }
@@ -49,7 +57,7 @@ export default function Profile() {
   if (loading) return <div className="px-3">loading...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#fffffc]">
       <Nav />
       <div className="max-w-4xl mx-auto flex gap-8 justify-between mt-8">
         {/* Side bar */}
@@ -62,22 +70,23 @@ export default function Profile() {
               Your Account
             </h1>
             <div className="md:flex hidden gap-4 items-center">
-              <Button
+              <ButtonV2
                 variant="primary"
                 size="md"
-                text="Edit profile"
                 onClick={() => setPopup("edit")}
-              />
-              <Button
+              >
+                Edit profile
+              </ButtonV2>
+              <ButtonV2
                 variant="primary"
                 size="md"
-                text="Delete Account"
                 onClick={() => setPopup("delete")}
-              />
+              >
+                Delete Account
+              </ButtonV2>
             </div>
 
             {/* Mobile Btn */}
-
             <button
               className="md:hidden block"
               onClick={() => setMobileAdd(!mobileAdd)}
@@ -87,20 +96,20 @@ export default function Profile() {
           </div>
           {mobileAdd && (
             <div className="p-6 flex flex-col gap-4">
-              <Button
+              <ButtonV2
                 variant="primary"
-                size="sm"
-                text="Edit profile"
+                size="md"
                 onClick={() => setPopup("edit")}
-                fullWidth={true}
-              />
-              <Button
+              >
+                Edit profile
+              </ButtonV2>
+              <ButtonV2
                 variant="primary"
-                size="sm"
-                text="Delete Account"
+                size="md"
                 onClick={() => setPopup("delete")}
-                fullWidth={true}
-              />
+              >
+                Delete Account
+              </ButtonV2>
             </div>
           )}
 
@@ -114,7 +123,7 @@ export default function Profile() {
                   className="w-38 h-38 border border-gray-300 rounded-4xl"
                 />
 
-                <div className="min-w-[20%] flex justify-between gap-9">
+                <div className="min-w-[20%] flex justify-between md:gap-9 gap-1">
                   <ul className="space-y-6">
                     <li>Username:</li>
                     <li>Email:</li>
@@ -154,6 +163,8 @@ export default function Profile() {
         <EditProfileCard
           setPopup={setPopup}
           fetchUserProfile={fetchUserProfile}
+          username={responseData?.username}
+          description={responseData?.description}
         />
       )}
 

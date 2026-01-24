@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import Button from "../components/Button";
 import { InputBox } from "../components/InputBox";
 import PostCard from "../components/PostCard";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { EditCommunityCard } from "../components/EditCommunityCard";
 import { ExitCommunityCard } from "../components/ExitCommunityCard";
 import { DeleteCommunityCard } from "../components/DeleteCommunityCard";
@@ -11,6 +10,7 @@ import { Side } from "../components/Side";
 import { Close } from "../icons/Close";
 import { Settings } from "../icons/Settings";
 import type { CommunityDetails, Post, ProfileData } from "../types/types";
+import { ButtonV2 } from "../componentsV2/ButtonV2";
 
 export default function Community() {
   const { slug } = useParams();
@@ -18,7 +18,7 @@ export default function Community() {
 
   // Response data and wbsocket state variables
   const [responseData, setResponseData] = useState<CommunityDetails | null>(
-    null
+    null,
   );
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -30,6 +30,7 @@ export default function Community() {
   const [mobileSettings, setMobileSettings] = useState(false);
   const [postList, setPostList] = useState<Post[]>([]);
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
+  const navigate = useNavigate();
 
   // Fetch community details
   const fetchCommunityDetail = async () => {
@@ -39,6 +40,11 @@ export default function Community() {
         method: "GET",
         credentials: "include",
       });
+      // Route protection
+      if (res.status === 405) {
+        navigate("/");
+        return;
+      }
 
       if (!res.ok) {
         alert("Request failed!");
@@ -104,7 +110,7 @@ export default function Community() {
         JSON.stringify({
           type: "join_room",
           roomId: slug,
-        })
+        }),
       );
     };
 
@@ -143,7 +149,7 @@ export default function Community() {
         const post = parsedData.post;
 
         setPostList((prev) =>
-          prev.map((p, i) => (i === parsedData.index ? post : p))
+          prev.map((p, i) => (i === parsedData.index ? post : p)),
         );
       }
       // console.log(postList);
@@ -172,7 +178,7 @@ export default function Community() {
             authorName: profileData?.username,
             authorAvatar: profileData?.avatar,
           },
-        })
+        }),
       );
 
       // Creating new post in DB
@@ -230,7 +236,7 @@ export default function Community() {
             ...post,
             likeCount: alreadyLiked ? post.likeCount - 1 : post.likeCount + 1,
           },
-        })
+        }),
       );
 
       // Updating like details in db
@@ -256,48 +262,49 @@ export default function Community() {
         {/* Main content */}
         <div className="w-full px-2">
           {/* Community Header */}
-          <div className="bg-white px-9 py-10 flex flex-col gap-7 border border-gray-200 rounded-xl">
+          <div className="bg-[#fde89e] px-9 py-10 flex flex-col gap-7 rounded-xl shadow-xs">
             <div className="flex justify-between">
               {/* Community name and role */}
               <div className="flex items-center gap-3">
-                <h1 className="text-xl font-medium tracking-tight">
+                <h1 className="text-2xl font-medium tracking-tight">
                   {responseData?.name}
                 </h1>
-                {responseData?.role === "ADMIN" ? (
-                  <p className="text-xs border rounded-xl border-red-500 text-red-500 font-medium px-2 py-1">
-                    {responseData?.role}
-                  </p>
-                ) : (
-                  <p className="text-xs border rounded-xl border-sky-500 text-sky-500 font-medium px-2 py-1">
-                    {responseData?.role}
-                  </p>
-                )}
+
+                <p className="text-xs rounded-lg bg-black text-gray-100 font-medium px-2 py-1.5">
+                  {responseData?.role}
+                </p>
               </div>
 
               {/* Community settings */}
               <div className="md:flex hidden gap-4 items-center">
                 {responseData?.role === "ADMIN" ? (
                   <>
-                    <Button
+                    <ButtonV2
                       variant="secondary"
-                      size="sm"
-                      text="Edit community"
+                      size="md"
                       onClick={() => setPopup("edit")}
-                    />
-                    <Button
+                      className="text-xs"
+                    >
+                      Edit community
+                    </ButtonV2>
+                    <ButtonV2
                       variant="secondary"
-                      size="sm"
-                      text="Delete community"
+                      size="md"
                       onClick={() => setPopup("delete")}
-                    />
+                      className="text-xs"
+                    >
+                      Delete community
+                    </ButtonV2>
                   </>
                 ) : (
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    text="Exit community"
+                  <ButtonV2
+                    variant="secondary"
+                    size="md"
                     onClick={() => setPopup("exit")}
-                  />
+                    className="text-xs"
+                  >
+                    Exit community
+                  </ButtonV2>
                 )}
               </div>
 
@@ -314,46 +321,53 @@ export default function Community() {
               <div className="flex flex-col px-6 gap-4 items-center">
                 {responseData?.role === "ADMIN" ? (
                   <>
-                    <Button
+                    <ButtonV2
                       variant="secondary"
-                      size="sm"
-                      text="Edit community"
+                      size="md"
                       onClick={() => setPopup("edit")}
-                      fullWidth={true}
-                    />
-                    <Button
+                      className="text-xs"
+                    >
+                      Edit community
+                    </ButtonV2>
+                    <ButtonV2
                       variant="secondary"
-                      size="sm"
-                      text="Delete community"
+                      size="md"
                       onClick={() => setPopup("delete")}
-                      fullWidth={true}
-                    />
+                      className="text-xs"
+                    >
+                      Delete community
+                    </ButtonV2>
                   </>
                 ) : (
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    text="Exit community"
+                  <ButtonV2
+                    variant="secondary"
+                    size="md"
                     onClick={() => setPopup("exit")}
-                    fullWidth={true}
-                  />
+                    className="text-xs"
+                  >
+                    Exit community
+                  </ButtonV2>
                 )}
               </div>
             )}
 
             {/* Community ID */}
-            <div className="flex items-center gap-2 mt-3">
-              <span className="text-sm md:text-normal">CommunityID:</span>
-              <span className="text-xs bg-sky- px-2 py-1 rounded-lg border border-gray-200">
-                {responseData?.id}
-              </span>
-            </div>
+            {responseData?.role === "ADMIN" ? (
+              <div className="flex items-center gap-2 mt-3">
+                <span className="text-sm md:text-normal">CommunityID:</span>
+                <span className="text-xs bg-sky- px-2 py-1 rounded-lg bg-white border border-gray-100">
+                  {responseData?.id}
+                </span>
+              </div>
+            ) : (
+              <p className="text-sm">{responseData?.description}</p>
+            )}
           </div>
 
           {/* Posts */}
           <div className="flex flex-col gap-2 mt-2">
             {/*Create new post box*/}
-            <div className="bg-white border border-gray-200 rounded-xl px-8 py-4 space-y-4">
+            <div className="border border-gray-200 bg-white shadow-xs rounded-xl px-8 py-4 space-y-4">
               <div className="flex gap-2">
                 <InputBox
                   reference={newPostRef}
@@ -363,12 +377,13 @@ export default function Community() {
                   fullWidth={true}
                   borderNone={true}
                 />
-                <Button
+                <ButtonV2
                   variant="primary"
                   size="md"
-                  text="Post"
                   onClick={handleCreatePost}
-                />
+                >
+                  Post
+                </ButtonV2>
               </div>
             </div>
 
@@ -391,16 +406,26 @@ export default function Community() {
         </div>
       </div>
 
-      {popup === "exit" && <ExitCommunityCard setPopup={setPopup} />}
+      {popup === "exit" && (
+        <ExitCommunityCard setPopup={setPopup} communityId={responseData?.id} />
+      )}
 
       {popup === "edit" && (
         <EditCommunityCard
+          communityId={responseData?.id}
           setPopup={setPopup}
           fetchCommunityDetail={fetchCommunityDetail}
+          communitName={responseData?.name}
+          communitDesc={responseData?.description}
         />
       )}
 
-      {popup === "delete" && <DeleteCommunityCard setPopup={setPopup} />}
+      {popup === "delete" && (
+        <DeleteCommunityCard
+          setPopup={setPopup}
+          communityId={responseData?.id}
+        />
+      )}
     </div>
   );
 }

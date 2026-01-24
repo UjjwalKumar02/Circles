@@ -1,8 +1,8 @@
 import { useState } from "react";
-import Button from "./Button";
 import { PopupCard } from "./PopupWrapper";
 import { useNavigate } from "react-router-dom";
 import type { ExitCommunityProps } from "../types/types";
+import { ButtonV2 } from "../componentsV2/ButtonV2";
 
 export function ExitCommunityCard({
   setPopup,
@@ -20,14 +20,14 @@ export function ExitCommunityCard({
         {
           method: "POST",
           credentials: "include",
-        }
+        },
       );
 
       if (!res.ok) {
         throw new Error("Exit request failed!");
       }
 
-      navigate("/dashboard");
+      navigate("/home");
     } catch (error) {
       console.log(error);
     } finally {
@@ -46,21 +46,22 @@ export function ExitCommunityCard({
         </h1>
 
         <div className="flex gap-3 items-center">
-          <Button
-            variant="primary"
-            size="md"
-            text="Exit"
-            onClick={handleExit}
-            fullWidth={true}
-            disabled={loading}
-          />
-          <Button
+          <ButtonV2
             variant="secondary"
             size="md"
-            text="Cancel"
+            onClick={handleExit}
+            disabled={loading}
+            loading={loading}
+          >
+            Exit
+          </ButtonV2>
+          <ButtonV2
+            variant="secondary"
+            size="md"
             onClick={() => setPopup(null)}
-            fullWidth={true}
-          />
+          >
+            Cancel
+          </ButtonV2>
         </div>
       </div>
     </PopupCard>

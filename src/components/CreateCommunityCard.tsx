@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { PopupCard } from "./PopupWrapper";
 import { InputBox } from "./InputBox";
-import Button from "./Button";
+import { ButtonV2 } from "../componentsV2/ButtonV2";
 
 interface Props {
   setPopup: React.Dispatch<React.SetStateAction<"create" | "join" | null>>;
@@ -59,29 +59,45 @@ export const CreateCommunityCard = ({
         reference={nameRef}
         size="md"
         type="text"
-        placeholder="Community Name"
+        placeholder="Circle Name"
       />
       <InputBox
         reference={descRef}
         size="md"
         type="text"
-        placeholder="Community Description"
+        placeholder="Description"
       />
 
       <div className="flex justify-between">
-        <Button
+        {/* <Button
           variant="primary"
           size="md"
           text="Create"
           onClick={handleCreate}
           disabled={loading ? true : false}
-        />
-        <Button
+        /> */}
+        <ButtonV2
+          variant="primary"
+          size="md"
+          onClick={handleCreate}
+          disabled={loading}
+          loading={loading}
+        >
+          Create
+        </ButtonV2>
+        <ButtonV2
+          variant="secondary"
+          size="md"
+          onClick={() => setPopup(null)}
+        >
+          Cancel
+        </ButtonV2>
+        {/* <Button
           variant="secondary"
           size="md"
           text="Cancel"
           onClick={() => setPopup(null)}
-        />
+        /> */}
       </div>
     </PopupCard>
   );

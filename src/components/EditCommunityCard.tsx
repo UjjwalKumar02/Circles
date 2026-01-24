@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
-import Button from "./Button";
 import { InputBox } from "./InputBox";
 import { PopupCard } from "./PopupWrapper";
 import type { EditCommunityProps } from "../types/types";
+import { ButtonV2 } from "../componentsV2/ButtonV2";
 
 export function EditCommunityCard({
   setPopup,
@@ -11,6 +11,7 @@ export function EditCommunityCard({
   communitDesc,
   fetchCommunityDetail,
 }: EditCommunityProps) {
+  // const slug =
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [loading, setLoading] = useState(false);
   const nameRef = useRef<HTMLInputElement | null>(null);
@@ -36,7 +37,7 @@ export function EditCommunityCard({
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (!res.ok) {
@@ -73,19 +74,18 @@ export function EditCommunityCard({
         size="md"
       />
       <div className="flex justify-between">
-        <Button
+        <ButtonV2
           variant="primary"
           size="md"
-          text="Update"
           onClick={handleEdit}
           disabled={loading}
-        />
-        <Button
-          variant="secondary"
-          size="md"
-          text="Cancel"
-          onClick={() => setPopup(null)}
-        />
+        >
+          Update
+        </ButtonV2>
+
+        <ButtonV2 variant="secondary" size="md" onClick={() => setPopup(null)}>
+          Cancel
+        </ButtonV2>
       </div>
     </PopupCard>
   );

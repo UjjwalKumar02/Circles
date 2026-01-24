@@ -26,7 +26,7 @@ export default function PostCard({
   onClickLike,
 }: PostCardProps) {
   return (
-    <div className="bg-white px-8 py-8 flex flex-col gap-7 border border-gray-200 rounded-xl">
+    <div className="bg-white px-8 py-8 flex flex-col gap-7 border border-gray-200 rounded-xl shadow-xs">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <img

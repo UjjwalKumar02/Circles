@@ -1,14 +1,21 @@
 import { useRef, useState } from "react";
 import { PopupCard } from "./PopupWrapper";
 import { InputBox } from "./InputBox";
-import Button from "./Button";
+import { ButtonV2 } from "../componentsV2/ButtonV2";
 
 interface Props {
   setPopup: React.Dispatch<React.SetStateAction<"edit" | "delete" | null>>;
   fetchUserProfile: () => void;
+  username?: string;
+  description?: string;
 }
 
-export default function EditProfileCard({ setPopup, fetchUserProfile }: Props) {
+export default function EditProfileCard({
+  setPopup,
+  fetchUserProfile,
+  username,
+  description,
+}: Props) {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [loading, setLoading] = useState(false);
   const usernameRef = useRef<HTMLInputElement | null>(null);
@@ -58,27 +65,28 @@ export default function EditProfileCard({ setPopup, fetchUserProfile }: Props) {
         type="text"
         placeholder="Username"
         size="md"
+        value={username}
       />
       <InputBox
         reference={descriptionRef}
         type="text"
         placeholder="Description"
         size="md"
+        value={description}
       />
       <div className="flex justify-between">
-        <Button
+        <ButtonV2
           variant="primary"
           size="md"
-          text="Update"
           onClick={handleEdit}
+          loading={loading}
           disabled={loading}
-        />
-        <Button
-          variant="secondary"
-          size="md"
-          text="Cancel"
-          onClick={() => setPopup(null)}
-        />
+        >
+          Update
+        </ButtonV2>
+        <ButtonV2 variant="secondary" size="md" onClick={() => setPopup(null)}>
+          Cancel
+        </ButtonV2>
       </div>
     </PopupCard>
   );

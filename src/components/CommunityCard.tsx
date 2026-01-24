@@ -1,33 +1,38 @@
+import { Link } from "react-router-dom";
+import { ButtonV2 } from "../componentsV2/ButtonV2";
+
 export function Community({
   name,
   role,
   desc,
-  key,
+  slug,
 }: {
   name: string;
   role: string;
   desc: string;
-  key?: string;
+  slug: string;
 }) {
   return (
-    <div
-      key={key}
-      className="bg-white flex flex-col gap-7 px-8 py-6 border border-gray-200 rounded-2xl shadow-xs"
-    >
-      <div className="flex justify-between items-center gap-3">
-        <h1 className="text-lg font-medium tracking-tight">{name}</h1>
-        {role === "ADMIN" ? (
-          <p className="text-xs border rounded-xl border-red-500 text-red-500 font-medium px-2 py-1">
+    <div className="w-full bg-[#fde89e] flex flex-col gap-5 px-9 py-8 md:px-7 md:py-6 rounded-xl shadow-xs">
+      <div className="flex md:flex-row flex-col justify-between md:items-center gap-3">
+        <div className="flex justify- items-center gap-3">
+          <h1 className="text-xl font-medium tracking-tight">{name}</h1>
+
+          <p className="text-xs border border-gray-100 rounded-lg bg-white font-medium px-2 py-1">
             {role}
           </p>
-        ) : (
-          <p className="text-xs border rounded-xl border-sky-500 text-sky-500 font-medium px-2 py-1">
-            {role}
-          </p>
-        )}
+        </div>
+
+        <p className="md:hidden block text-gray-700 text-sm">{desc}</p>
+
+        <Link to={`/community/${slug}`}>
+          <ButtonV2 variant="primary" size="md" className="w-fit mt-1">
+            Enter &gt;
+          </ButtonV2>
+        </Link>
       </div>
 
-      <p className="text-gray-700">{desc}</p>
+      <p className="md:block hidden text-gray-700 text-sm">{desc}</p>
     </div>
   );
 }
