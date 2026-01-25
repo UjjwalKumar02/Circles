@@ -13,13 +13,13 @@ export function Community({
   slug: string;
 }) {
   return (
-    <div className="w-full bg-[#fde89e] flex flex-col gap-5 px-9 py-8 md:px-7 md:py-6 rounded-xl shadow-xs">
+    <div className="w-full bg-white border border-gray-200 flex flex-col gap-5 px-9 py-8 md:px-7 md:py-6 rounded-2xl shadow-xs">
       <div className="flex md:flex-row flex-col justify-between md:items-center gap-3">
-        <div className="flex justify- items-center gap-3">
+        <div className="flex md:justify-start justify-between items-center gap-3">
           <h1 className="text-xl font-medium tracking-tight">{name}</h1>
 
-          <p className="text-xs border border-gray-100 rounded-lg bg-white font-medium px-2 py-1">
-            {role}
+          <p className="text-xs rounded-lg bg-[#fde89e] text-gray-800 font-medium px-2 py-1">
+            {role[0] + role.slice(1).toLowerCase()}
           </p>
         </div>
 

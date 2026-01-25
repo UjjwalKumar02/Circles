@@ -9,7 +9,7 @@ import { Nav } from "../components/Nav";
 import { Side } from "../components/Side";
 import { Close } from "../icons/Close";
 import { Settings } from "../icons/Settings";
-import type { CommunityDetails, Post, ProfileData } from "../types/types";
+import type { CommunityDetails, Post } from "../types/types";
 import { ButtonV2 } from "../componentsV2/ButtonV2";
 
 export default function Community() {
@@ -20,16 +20,16 @@ export default function Community() {
   const [responseData, setResponseData] = useState<CommunityDetails | null>(
     null,
   );
-  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [postList, setPostList] = useState<Post[]>([]);
   const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [username, setUsername] = useState("");
+  const [avatar, setAvatar] = useState("");
 
   // Other utility state variables
-  const [popup, setPopup] = useState<"edit" | "delete" | "exit" | null>(null);
   const newPostRef = useRef<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(false);
+  const [popup, setPopup] = useState<"edit" | "delete" | "exit" | null>(null);
   const [mobileSettings, setMobileSettings] = useState(false);
-  const [postList, setPostList] = useState<Post[]>([]);
-  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
   const navigate = useNavigate();
 
   // Fetch community details
@@ -47,8 +47,7 @@ export default function Community() {
       }
 
       if (!res.ok) {
-        alert("Request failed!");
-        return;
+        throw new Error("Request failed!");
       }
 
       const jsonData = await res.json();
@@ -57,8 +56,8 @@ export default function Community() {
         content: p.content,
         authorName: p.author.username,
         authorAvatar: p.author.avatar,
-        likeCount: p.likes.length,
-        commentCount: p.comments.length,
+        likeCount: p.likesCount,
+        isLiked: p.likes.length > 0,
         createdAt: new Date(p.createdAt),
       }));
 
@@ -71,29 +70,10 @@ export default function Community() {
       });
 
       setPostList(mappedPosts);
+      // console.log(mappedPosts);
     } catch (error) {
       console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch profile details for the websocket messages
-  const fetchUserProfile = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${backendUrl}/api/user/profile`, {
-        method: "GET",
-        credentials: "include",
-      });
-      if (!res.ok) {
-        throw new Error("Request failed");
-      }
-      const jsonData = await res.json();
-      setProfileData(jsonData);
-      // console.log(jsonData);
-    } catch (error) {
-      console.log(error);
+      alert("Interal server error!");
     } finally {
       setLoading(false);
     }
@@ -101,7 +81,8 @@ export default function Community() {
 
   useEffect(() => {
     fetchCommunityDetail();
-    fetchUserProfile();
+    setUsername(localStorage.getItem("username") ?? "");
+    setAvatar(localStorage.getItem("avatar") ?? "");
 
     // Websocket connection
     const ws = new WebSocket(`${backendUrl}`);
@@ -113,7 +94,6 @@ export default function Community() {
         }),
       );
     };
-
     setSocket(ws);
 
     return () => {
@@ -136,7 +116,6 @@ export default function Community() {
             content: post.content,
             createdAt: post.createdAt,
             likeCount: post.likeCount,
-            commentCount: post.commentCount,
             authorName: post.authorName,
             authorAvatar: post.authorAvatar,
           },
@@ -149,7 +128,13 @@ export default function Community() {
         const post = parsedData.post;
 
         setPostList((prev) =>
-          prev.map((p, i) => (i === parsedData.index ? post : p)),
+          prev.map((p) => {
+            if (p.id !== post.id) return p;
+            return {
+              ...p,
+              likeCount: post.likeCount,
+            };
+          }),
         );
       }
       // console.log(postList);
@@ -164,23 +149,6 @@ export default function Community() {
     }
 
     try {
-      // Sending new post data to ws
-      socket?.send(
-        JSON.stringify({
-          type: "chat",
-          roomId: slug,
-          message: {
-            id: postList.length + 1,
-            content: newPostRef.current?.value,
-            createdAt: new Date(),
-            likeCount: 0,
-            commentCount: 0,
-            authorName: profileData?.username,
-            authorAvatar: profileData?.avatar,
-          },
-        }),
-      );
-
       // Creating new post in DB
       const response = await fetch(`${backendUrl}/api/post/create`, {
         method: "POST",
@@ -199,6 +167,22 @@ export default function Community() {
         return;
       }
 
+      // Sending new post data to ws
+      socket?.send(
+        JSON.stringify({
+          type: "chat",
+          roomId: slug,
+          message: {
+            id: postList[0].id + 1,
+            content: newPostRef.current?.value,
+            createdAt: new Date(),
+            likeCount: 0,
+            authorName: username,
+            authorAvatar: avatar,
+          },
+        }),
+      );
+
       // Cleaning new post ref
       if (newPostRef.current) {
         newPostRef.current.value = "";
@@ -208,6 +192,7 @@ export default function Community() {
     }
   };
 
+  // Toggle like handler
   const toggleLike = async ({
     postId,
     index,
@@ -215,37 +200,56 @@ export default function Community() {
     postId: number;
     index: number;
   }) => {
-    const alreadyLiked = likedPosts.has(postId);
+    const prevLiked = postList[index].isLiked;
+    const prevLikeCount = postList[index].likeCount;
 
-    setLikedPosts((prev) => {
-      const newSet = new Set(prev);
-      alreadyLiked ? newSet.delete(postId) : newSet.add(postId);
-      return newSet;
-    });
-
-    const post = postList[index];
+    setPostList((prev) =>
+      prev.map((p, i) => {
+        if (i !== index) return p;
+        return {
+          ...p,
+          isLiked: !prevLiked,
+          likeCount: prevLiked ? prevLikeCount - 1 : prevLikeCount + 1,
+        };
+      }),
+    );
 
     try {
+      // Updating like details in db
+      const res = await fetch(`${backendUrl}/api/post/${postId}/like`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        throw new Error("Request failed");
+      }
+
       // sending liked post details to websocket
       socket?.send(
         JSON.stringify({
           type: "toggle_like",
           roomId: slug,
-          index,
           message: {
-            ...post,
-            likeCount: alreadyLiked ? post.likeCount - 1 : post.likeCount + 1,
+            id: postId,
+            likeCount: prevLiked ? prevLikeCount - 1 : prevLikeCount + 1,
           },
         }),
       );
-
-      // Updating like details in db
-      await fetch(`${backendUrl}/api/post/${postId}/like`, {
-        method: "POST",
-        credentials: "include",
-      });
     } catch (error) {
       console.log(error);
+
+      // Making like to previous state
+      setPostList((prev) =>
+        prev.map((p, i) => {
+          if (i !== index) return p;
+          return {
+            ...p,
+            isLiked: prevLiked,
+            likeCount: prevLikeCount,
+          };
+        }),
+      );
+
       throw new Error("Request failed");
     }
   };
@@ -253,16 +257,16 @@ export default function Community() {
   if (loading) return <div className="px-3">loading...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Nav />
-      <div className="max-w-4xl mx-auto flex gap-7 justify-between mt-6">
+    <div className="min-h-screen bg-[#fffffc]">
+      <Nav avatar={avatar} />
+      <div className="max-w-4xl mx-auto flex gap-6 justify-between mt-6">
         {/* Side bar */}
         <Side />
 
         {/* Main content */}
-        <div className="w-full px-2">
+        <div className="w-full px-4 mb-10">
           {/* Community Header */}
-          <div className="bg-[#fde89e] px-9 py-10 flex flex-col gap-7 rounded-xl shadow-xs">
+          <div className="bg-white border border-gray-200 px-9 py-10 flex flex-col gap-7 rounded-xl shadow-xs">
             <div className="flex justify-between">
               {/* Community name and role */}
               <div className="flex items-center gap-3">
@@ -270,8 +274,9 @@ export default function Community() {
                   {responseData?.name}
                 </h1>
 
-                <p className="text-xs rounded-lg bg-black text-gray-100 font-medium px-2 py-1.5">
-                  {responseData?.role}
+                <p className="text-xs rounded-lg bg-[#fde89e] font-medium px-2 py-1.5">
+                  {(responseData?.role[0] ?? "") +
+                    responseData?.role.slice(1).toLowerCase()}
                 </p>
               </div>
 
@@ -280,7 +285,7 @@ export default function Community() {
                 {responseData?.role === "ADMIN" ? (
                   <>
                     <ButtonV2
-                      variant="secondary"
+                      variant="primary"
                       size="md"
                       onClick={() => setPopup("edit")}
                       className="text-xs"
@@ -288,7 +293,7 @@ export default function Community() {
                       Edit community
                     </ButtonV2>
                     <ButtonV2
-                      variant="secondary"
+                      variant="primary"
                       size="md"
                       onClick={() => setPopup("delete")}
                       className="text-xs"
@@ -298,7 +303,7 @@ export default function Community() {
                   </>
                 ) : (
                   <ButtonV2
-                    variant="secondary"
+                    variant="primary"
                     size="md"
                     onClick={() => setPopup("exit")}
                     className="text-xs"
@@ -322,7 +327,7 @@ export default function Community() {
                 {responseData?.role === "ADMIN" ? (
                   <>
                     <ButtonV2
-                      variant="secondary"
+                      variant="primary"
                       size="md"
                       onClick={() => setPopup("edit")}
                       className="text-xs"
@@ -330,7 +335,7 @@ export default function Community() {
                       Edit community
                     </ButtonV2>
                     <ButtonV2
-                      variant="secondary"
+                      variant="primary"
                       size="md"
                       onClick={() => setPopup("delete")}
                       className="text-xs"
@@ -340,7 +345,7 @@ export default function Community() {
                   </>
                 ) : (
                   <ButtonV2
-                    variant="secondary"
+                    variant="primary"
                     size="md"
                     onClick={() => setPopup("exit")}
                     className="text-xs"
@@ -353,9 +358,9 @@ export default function Community() {
 
             {/* Community ID */}
             {responseData?.role === "ADMIN" ? (
-              <div className="flex items-center gap-2 mt-3">
+              <div className="flex items-center justify-between gap-2 mt-3">
                 <span className="text-sm md:text-normal">CommunityID:</span>
-                <span className="text-xs bg-sky- px-2 py-1 rounded-lg bg-white border border-gray-100">
+                <span className="text-xs bg-sky- px-2 py-1.5 rounded-lg border border-gray-200">
                   {responseData?.id}
                 </span>
               </div>
@@ -396,8 +401,8 @@ export default function Community() {
                     avatar={p.authorAvatar}
                     content={p.content}
                     likeCount={p.likeCount}
-                    commentCount={p.commentCount ?? 0}
                     createdAt={p.createdAt}
+                    isLiked={p.isLiked ?? false}
                     onClickLike={() => toggleLike({ postId: p.id, index })}
                   />
                 </div>

@@ -47,7 +47,7 @@ export function ExitCommunityCard({
 
         <div className="flex gap-3 items-center">
           <ButtonV2
-            variant="secondary"
+            variant="primary"
             size="md"
             onClick={handleExit}
             disabled={loading}

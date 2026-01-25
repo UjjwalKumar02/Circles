@@ -5,8 +5,8 @@ interface PostCardProps {
   avatar: string;
   content: string;
   likeCount: number;
-  commentCount: number;
   createdAt: Date;
+  isLiked: boolean;
   onClickLike?: () => void;
 }
 
@@ -23,6 +23,7 @@ export default function PostCard({
   content,
   likeCount,
   createdAt,
+  isLiked,
   onClickLike,
 }: PostCardProps) {
   return (
@@ -43,14 +44,9 @@ export default function PostCard({
 
         <div className="flex items-center gap-6 text-sm pl-1 pt-1">
           <button onClick={onClickLike} className="flex items-center gap-0.5">
-            <Like />
+            {isLiked ? <Like fill="red" /> : <Like fill="none" />}
             {likeCount}
           </button>
-
-          {/* <div className="flex items-center gap-0.5">
-          <Comment />
-          {commentCount}
-        </div> */}
         </div>
       </div>
 

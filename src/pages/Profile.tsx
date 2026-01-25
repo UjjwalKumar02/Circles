@@ -40,11 +40,13 @@ export default function Profile() {
       if (!res.ok) {
         throw new Error("Request failed");
       }
+
       const jsonData = await res.json();
       setResponseData(jsonData);
       // console.log(jsonData);
     } catch (error) {
       console.log(error);
+      alert("Interal server error!");
     } finally {
       setLoading(false);
     }
@@ -58,13 +60,14 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-[#fffffc]">
-      <Nav />
+      <Nav avatar={responseData?.avatar ?? ""} />
+
       <div className="max-w-4xl mx-auto flex gap-8 justify-between mt-8">
         {/* Side bar */}
         <Side />
 
         {/* Main content */}
-        <div className="w-full mt-2 px-6">
+        <div className="w-full mt-2 px-4">
           <div className="flex justify-between">
             <h1 className="text-xl font-medium tracking-tight ">
               Your Account
@@ -123,7 +126,7 @@ export default function Profile() {
                   className="w-38 h-38 border border-gray-300 rounded-4xl"
                 />
 
-                <div className="min-w-[20%] flex justify-between md:gap-9 gap-1">
+                <div className="min-w-[20%] flex justify-between md:gap-8 gap-1">
                   <ul className="space-y-6">
                     <li>Username:</li>
                     <li>Email:</li>

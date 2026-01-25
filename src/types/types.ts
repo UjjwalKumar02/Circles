@@ -64,7 +64,7 @@ export interface Post {
   authorAvatar: string;
   createdAt: Date;
   likeCount: number;
-  commentCount?: number;
+  // commentCount?: number;
   isLiked?: boolean;
 }
 

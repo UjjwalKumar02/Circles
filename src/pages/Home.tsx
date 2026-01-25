@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Nav } from "../components/Nav";
 import { Side } from "../components/Side";
 import { Community } from "../components/CommunityCard";
-import type { CommunityWithRole } from "../types/types";
+import type { CommunityWithRole, ProfileData } from "../types/types";
 import { Add } from "../icons/Add";
 import { Close } from "../icons/Close";
 import { ButtonV2 } from "../componentsV2/ButtonV2";
@@ -16,10 +16,12 @@ export default function Home() {
   const [responseData, setResponseData] = useState<CommunityWithRole[] | null>(
     null,
   );
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(false);
   const [mobileAdd, setMobileAdd] = useState(false);
   const navigate = useNavigate();
 
+  // Fetch users communities function
   const fetchUserCommunities = async () => {
     try {
       setLoading(true);
@@ -42,27 +44,50 @@ export default function Home() {
       // console.log(responseData);
     } catch (error) {
       console.log(error);
+      alert("Interal server error!");
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch user profile details function
+  const fetchProfileData = async () => {
+    try {
+      const res = await fetch(`${backendUrl}/api/user/profile`, {
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error("Request failed");
+      }
+
+      const jsonData = await res.json();
+      setProfileData(jsonData);
+
+      localStorage.setItem("username", jsonData?.username);
+      localStorage.setItem("avatar", jsonData?.avatar);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     fetchUserCommunities();
+    fetchProfileData();
   }, []);
 
   if (loading) return <div className="px-3">loading...</div>;
 
   return (
     <div className="min-h-screen bg-[#fffffc]">
-      <Nav />
-      <div className="max-w-4xl mx-auto flex gap-6 justify-between mt-8">
-        {/* Side bar */}
+      <Nav avatar={profileData?.avatar ?? ""} />
 
+      <div className="max-w-4xl mx-auto flex gap-5 justify-between mt-8">
+        {/* Side bar */}
         <Side />
 
         {/* Main content */}
-        <div className="w-full mt-2 px-6">
+        <div className="w-full mt-2 px-6 mb-10">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-medium tracking-tight ">
               Your Communities
